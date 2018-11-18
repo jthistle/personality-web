@@ -1,0 +1,154 @@
+{
+	"statements": [
+		{
+			"id": 1,
+			"statement": "I am talkative",
+			"factor": "e",
+		},
+		{
+			"id": 2,
+			"statement": "I am skilled in humor",
+			"factor": "e",
+		},
+		{
+			"id": 3,
+			"statement": "I am energetic",
+			"factor": "e",
+		},
+		{
+			"id": 4,
+			"statement": "I am facially and gesturally expressive",
+			"factor": "e",
+		},
+		{
+			"id": 5,
+			"statement": "I behave assertively",
+			"factor": "e",
+		},
+		{
+			"id": 6,
+			"statement": "I am gregarious (social)",
+			"factor": "e",
+		},
+		{
+			"id": 7,
+			"statement": "I am not critical or skeptical",
+			"factor": "a",
+		},
+		{
+			"id": 8,
+			"statement": "I behave in a forgiving way",
+			"factor": "a",
+		},
+		{
+			"id": 9,
+			"statement": "I am sympathetic/considerate",
+			"factor": "a",
+		},
+		{
+			"id": 10,
+			"statement": "I am likeable",
+			"factor": "a",
+		},
+		{
+			"id": 11,
+			"statement": "I am warm and compassionate",
+			"factor": "a",
+		},
+		{
+			"id": 12,
+			"statement": "I am trustful",
+			"factor": "a",
+		},
+		{
+			"id": 13,
+			"statement": "I am dependable",
+			"factor": "c",
+		},
+		{
+			"id": 14,
+			"statement": "I am productive",
+			"factor": "c",
+		},
+		{
+			"id": 15,
+			"statement": "I am able to delay gratification",
+			"factor": "c",
+		},
+		{
+			"id": 16,
+			"statement": "I am not self-indulgent",
+			"factor": "c",
+		},
+		{
+			"id": 17,
+			"statement": "I behave ethically",
+			"factor": "c",
+		},
+		{
+			"id": 18,
+			"statement": "I have a high aspiration level",
+			"factor": "c",
+		},
+		{
+			"id": 19,
+			"statement": "I am thin-skinned",
+			"factor": "n",
+		},
+		{
+			"id": 20,
+			"statement": "I have a brittle ego",
+			"factor": "n",
+		},
+		{
+			"id": 21,
+			"statement": "I am self-defeating",
+			"factor": "n",
+		},
+		{
+			"id": 22,
+			"statement": "I am anxious",
+			"factor": "n",
+		},
+		{
+			"id": 23,
+			"statement": "I am concerned about adequecy",
+			"factor": "n",
+		},
+		{
+			"id": 24,
+			"statement": "I have fluctuating moods",
+			"factor": "n",
+		},
+		{
+			"id": 25,
+			"statement": "I have a wide range of interests",
+			"factor": "o",
+		},
+		{
+			"id": 26,
+			"statement": "I am introspective (self-examining)",
+			"factor": "o",
+		},
+		{
+			"id": 27,
+			"statement": "I have unusual thought processes",
+			"factor": "o",
+		},
+		{
+			"id": 28,
+			"statement": "I value intellectual matters",
+			"factor": "o",
+		},
+		{
+			"id": 29,
+			"statement": "I judge things in unconventional terms",
+			"factor": "o",
+		},
+		{
+			"id": 30,
+			"statement": "I am aesthetically reactive",
+			"factor": "o",
+		},
+	]
+}

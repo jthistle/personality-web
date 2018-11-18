@@ -1,38 +1,28 @@
 import React, { Component } from 'react';
 
-class Clock extends React.Component {
+class Button extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {date: new Date()};
-	}
-
-	tick() {
-    this.setState({
-      date: new Date()
-    });
-  }
-
-	componentDidMount() {
-		this.timerID = setInterval(
-			() => this.tick(),
-			1000
-		);
-	}
-
-	componentWillUnmount() {
-		clearInterval(this.timerID);
 	}
 
 	render() {
 		return (
-			<div>
-				<h2>It is {this.state.date.toLocaleTimeString()}</h2>
+			<div className="Button" onClick={this.props.onClick}>
+				Test button
 			</div>
 		);
 	}
 }
 
-class Header extends React.Component {
+function Title() {
+	return (
+		<div id="Title">
+			Personality
+		</div>
+	);
+}
+
+class Header extends Component {
 	constructor(props) {
 		super(props);
 	}
@@ -40,13 +30,12 @@ class Header extends React.Component {
 	render() {
 		return (
 			<div id="Header">
-				<h1>Header</h1>
-				<Clock />
+				<Title />
 			</div>
 		);
 	}
 }
 
 
-export { Clock, Header };
-export default Clock;
+export { Header, Button };
+export default Header;

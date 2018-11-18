@@ -1,16 +1,75 @@
+:root {
+  --main-bg-color: #282c34;
+}
+
 .App {
   text-align: center;
-  background-color: #282c34;
+  background-color: var(--main-bg-color);
+  color: white;
   min-height: 100vh;
   min-width: 100vw;
+
+  padding: 0;
+  margin: 0;
+
+  transition: all 0.3s ease;
+}
+
+#MainWrapper {
   display: flex;
-  color: white;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 100vw;
 }
 
 #Header {
+  border-bottom: 1px solid white;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
   width: 100%;
-  flex-direction: column;
+  height: 5rem;
+  justify-content: flex-start;
+
+  display: flex;
   align-items: center;
-  justify-content: center;
+}
+
+#Header #Title {
   font-size: 2rem;
+  font-weight: bold;
+  padding: 0 2rem;
+}
+
+#DiceList {
+  list-style-type: none;
+  margin: auto;
+  width: 100%;
+  min-width: 15rem;
+  align-items: center;
+}
+
+#DiceList ul {
+  padding: 0;
+  width: 30%;
+  margin: auto;
+}
+
+#DiceList ul li {
+  list-style-type: none;
+  font-size: 1.5rem;
+  border-bottom: 1px solid #EEE;
+  padding: 1rem 0;
+}
+
+.Button {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid white;
+  background-color: var(--main-bg-color);
+  margin: auto;
+  transition: background-color 0.3s ease;
+}
+
+.Button:hover {
+  background-color: #555;
 }
