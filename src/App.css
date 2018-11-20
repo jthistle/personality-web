@@ -2,6 +2,48 @@
   --main-bg-color: #282c34;
 }
 
+@font-face {
+    font-family: 'Rubik';
+    src: url('resources/fonts/Rubik-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('resources/fonts/Rubik-Italic.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('resources/fonts/Rubik-Bold.ttf');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('resources/fonts/Rubik-BoldItalic.ttf');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('resources/fonts/Rubik-Light.ttf');
+    font-weight: lighter;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('resources/fonts/Rubik-LightItalic.ttf');
+    font-weight: lighter;
+    font-style: italic;
+}
+
 .App {
   text-align: center;
   background-color: var(--main-bg-color);
@@ -13,30 +55,66 @@
   margin: 0;
 
   transition: all 0.3s ease;
+
+  font-family: Rubik;
 }
+
+a {
+  text-decoration: none;
+  color: white;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 
 #MainWrapper {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  min-width: 100vw;
+  justify-content: space-around;
+  width: auto;
+  margin: 0 4rem;
 }
 
-#Header {
+@media only screen and (max-width: 600px) {
+  #MainWrapper {
+    margin: 0 0.2rem;
+  }
+}
+
+@media only screen and (min-width: 800px) {
+  #MainWrapper {
+    margin: 0 8rem;
+  }
+}
+
+.Header {
   border-bottom: 1px solid white;
   padding: 1rem 0;
   margin-bottom: 2rem;
   width: 100%;
-  height: 5rem;
+  height: 3rem;
   justify-content: flex-start;
 
   display: flex;
   align-items: center;
 }
 
-#Header #Title {
+.HeaderItem {
+  margin: 0 1.5rem;
+}
+
+.HeaderItemLeft {
+
+}
+
+.HeaderItemRight {
+  margin-left: auto;
+}
+
+.Header .Title {
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: normal;
   padding: 0 2rem;
 }
 
@@ -68,8 +146,55 @@
   background-color: var(--main-bg-color);
   margin: auto;
   transition: background-color 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .Button:hover {
   background-color: #555;
+}
+
+.Heading {
+  font-size: 3rem;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.BigButton {
+  font-size: 2.5rem;
+  margin: 1rem auto;
+  padding: 1rem;
+}
+
+.BigText {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.Highlight {
+  background-color: rgba(0, 0, 0, 0.2);
+  font-style: italic;
+  padding: 0 0.8rem;
+  display: inline-block;
+}
+
+.BigText .Highlight {
+  margin-top: 0.2rem;
+}
+
+/* CARD STUFF */
+
+.CardContainter {
+  margin-top: 3rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.Card {
+  width: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 0.5rem 0;
+  font-size: 1.2rem;
+  border-radius: 0.5rem;
 }

@@ -1,6 +1,9 @@
+// This remains as an example of how to integrate React and GraphQL
+
 import React, { Component } from 'react';
 import { Header, Button } from './objects';
 import './App.css';
+import { Link } from 'react-router-dom';
 
 class DiceList extends Component {
 	constructor(props) {
@@ -67,12 +70,9 @@ class Dice extends Component {
 
 	render() {
 		return (
-			<div className="App">
-				<Header />
-				<div id="MainWrapper">
-					<Button onClick={this.reroll} />
-					<DiceList diceVals={this.state.dice} />
-				</div>
+			<div id="MainWrapper">
+				<Button onClick={this.reroll} text="Roll Dice" />
+				<DiceList diceVals={this.state.dice} />
 			</div>
 		)
 	}
