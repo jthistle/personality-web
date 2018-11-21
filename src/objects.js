@@ -14,7 +14,7 @@ class Heading extends Component {
 class Text extends Component {
 	render() {
 		return (
-			<div className={ (this.props.big ? "BigText" : "") }>
+			<div className={ (this.props.big ? " BigText" : "") + (this.props.subtle ? " SubtleText" : "") }>
 				{ this.props.children }
 			</div>
 		);
