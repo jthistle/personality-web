@@ -77,6 +77,7 @@ class PersonalityTest extends Component {
 	}
 
 	saveChoices(){
+		// This method uses a Q-Sort.
 		// Max point score:
 		// 48
 		// Min point score:
@@ -96,6 +97,8 @@ class PersonalityTest extends Component {
 			return;
 		}
 
+		// Calculate the score that each descriptor gets based on position
+		// and divisions.
 		var scores = {
 			o: 0,
 			c: 0,
@@ -110,7 +113,6 @@ class PersonalityTest extends Component {
 			for (var i=0; i<divisions.length; i++){
 				if (ind < total+divisions[i]){
 					score = 9-i;
-					console.log(score);
 					break;
 				}
 				total += divisions[i];

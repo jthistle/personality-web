@@ -75,6 +75,7 @@ a {
   justify-content: space-around;
   width: auto;
   margin: 0 4rem;
+  height: 100%;
 }
 
 @media only screen and (max-width: 600px) {
@@ -216,4 +217,76 @@ a {
 
 .Card .CardRight {
   content: "";
+}
+
+/* TEST B */
+.CardBWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.CardB {
+  margin-top: 2rem;
+  font-size: 2rem;
+  padding: 1rem;
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 1rem;
+  max-width: 30rem;
+  height: auto;
+}
+
+.SliderBWrapper {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.SliderB {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  max-width: 10rem;
+  height: 2.5rem;
+  background: none;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.SliderB:hover {
+    opacity: 1;
+}
+
+.SliderB::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 1.5rem;
+  background: white;
+  cursor: pointer;
+  transition: .1s;
+}
+
+.SliderB::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 1.5rem;
+  background: white;
+  cursor: pointer;
+  transition: .1s;
+}
+
+
+.SliderB:hover::-webkit-slider-thumb {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 2rem;
+}
+
+.SliderB:hover::-moz-range-thumb {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 2rem;
 }
