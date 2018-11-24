@@ -68,13 +68,17 @@ var root = {
 		return new Promise((resolve, reject) => {
 			connection.query('SELECT * FROM profiles WHERE hash="'+hash+'" LIMIT 1', function (error, results, fields) {
 				if (error) reject(error);
-				console.log('Profile 1: ', results[0]);
-				resolve({
-					id: results[0].id,
-					hash: results[0].hash,
-					profileData: JSON.parse(results[0].profileData),
-					//interactions: JSON.parse(results[0].interactions),
-				});
+				if (results.length == 0) {
+					reject("Profile not found");
+				} else {	
+					console.log('Profile 1: ', results[0]);
+					resolve({
+						id: results[0].id,
+						hash: results[0].hash,
+						profileData: JSON.parse(results[0].profileData),
+						//interactions: JSON.parse(results[0].interactions),
+					});
+				}
 			});
 		});
 	},

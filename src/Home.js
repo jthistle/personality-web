@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Header, Button, Heading, Highlight } from './objects';
+import { Header, Button, Heading, Highlight, Text, Spacer } from './objects';
 import './App.css';
 import { Link } from 'react-router-dom';
 
@@ -22,14 +22,16 @@ class Home extends Component {
 		// DEBUG: force a certain test
 		// localStorage.removeItem("selectedTest");
 		this.whichTest = "testB";
-
 	}
 
 	render() {
 		return (
 			<div id="MainWrapper">
 				<Heading>Contribute to <Highlight>new</Highlight> research into personality</Heading>
+				<Spacer height="2" />
 				<Button big linkTo={ this.whichTest }>Take the quick personality test</Button>
+				<Spacer height="2" />
+				<Text big>Got an account already? Login in the top-right corner</Text>
 			</div>
 		);
 	}

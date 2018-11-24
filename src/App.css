@@ -78,9 +78,34 @@ a {
   height: 100%;
 }
 
+.Header {
+  border-bottom: 1px solid white;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  width: 100%;
+  min-height: 3rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.HeaderItem {
+  margin: 0.5rem 1.5rem;
+}
+
+.HeaderItemLeft {
+
+}
+
 @media only screen and (max-width: 600px) {
   #MainWrapper {
     margin: 0 0.2rem;
+  }
+
+  .Header {
+    justify-content: center;
   }
 }
 
@@ -88,37 +113,85 @@ a {
   #MainWrapper {
     margin: 0 8rem;
   }
+
+  .HeaderItemRight {
+    margin-left: auto;
+  }
 }
 
-.Header {
-  border-bottom: 1px solid white;
-  padding: 1rem 0;
-  margin-bottom: 2rem;
-  width: 100%;
-  height: 3rem;
-  justify-content: flex-start;
-
-  display: flex;
-  align-items: center;
-}
-
-.HeaderItem {
-  margin: 0 1.5rem;
-}
-
-.HeaderItemLeft {
-
-}
-
-.HeaderItemRight {
-  margin-left: auto;
-}
 
 .Header .Title {
   font-size: 2rem;
   font-weight: normal;
   padding: 0 2rem;
 }
+
+.LoggedIn {
+  height: 2rem;
+  font-size: 1rem;
+  background-color: #444;
+  color: white;
+  border: 1px solid white;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  padding: 0 0.5rem;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.LoggedInCopyBtn {
+  border-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  width: 2rem;
+  background-color: #333;
+  border: 1px solid white;
+  border-left: none;
+  box-sizing: border-box;
+  transition: background-color 0.1s;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.LoggedInCopyBtn:hover {
+  background-color: #666;
+}
+
+.LoggedInCopyBtnImg {
+  max-height: 1.5rem;
+  max-width: 1.5rem;
+}
+
+.LogoutBtn {
+  border-radius: 0.5rem;
+  height: 2rem;
+  margin: 0 0.5rem;
+  padding: 0;
+  width: 2rem;
+  background-color: #7f0000;
+  border: 1px solid #d8b2b2;
+  box-sizing: border-box;
+  transition: background-color 0.1s;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.LogoutBtn:hover {
+  background-color: #a54c4c;
+}
+
+.LogoutBtnImg {
+  max-height: 1.2rem;
+  max-width: 1.2rem;
+}
+
 
 #DiceList {
   list-style-type: none;

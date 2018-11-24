@@ -13,10 +13,16 @@ class Slider extends Component {
 		}
 
 		this.handleMouseUp = this.handleMouseUp.bind(this);
+		this.handleKeyPress = this.handleKeyPress.bind(this);
+	}
+
+	handleKeyPress(evt){
+		if (evt.key === "Enter")
+			this.handleMouseUp();
 	}
 
 	handleMouseUp(evt) {
-		this.props.handleMouseUp(evt);
+		this.props.handleMouseUp();
 		this.setState({
 			inputValue: '50',
 			skipNextUpdate: true
@@ -42,7 +48,8 @@ class Slider extends Component {
 			<div className="SliderBWrapper">
 				<input onMouseUp={ this.handleMouseUp } className="SliderB" 
 					id="slider" type="range" min={ this.props.min } max={ this.props.max } 
-					value={this.state.inputValue} onChange={evt => this.updateInputValue(evt)} />
+					value={this.state.inputValue} onChange={evt => this.updateInputValue(evt)}
+					onKeyPress={this.handleKeyPress} />
 			</div>
     	);
    	}

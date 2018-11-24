@@ -5,7 +5,7 @@ import Home from './Home';
 import PersonalityTest from './PersonalityTest';
 import PersonalityTestB from './PersonalityTestB';
 import './App.css';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
 
 class App extends Component {
 	render() {
@@ -23,4 +23,4 @@ class App extends Component {
 	}
 }
 
-export default App;
+export default withRouter(App);

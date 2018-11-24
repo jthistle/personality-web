@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Header, Button, Heading, Text, Highlight, Spacer } from './objects';
 import { Card, CardContainer } from './testObjects';
 import './App.css';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 var descriptors = require("./descriptors.json");
 
@@ -12,6 +12,7 @@ class PersonalityTest extends Component {
 
 		this.state = {
 			positions: Array(),
+			redirect: false,
 		}
 
 		this.handleDragEnd = this.handleDragEnd.bind(this);
@@ -77,6 +78,9 @@ class PersonalityTest extends Component {
 	}
 
 	saveChoices(){
+		if (this.state.redirect)
+			return;
+
 		// This method uses a Q-Sort.
 		// Max point score:
 		// 48
@@ -129,12 +133,38 @@ class PersonalityTest extends Component {
 
 		console.log(scores);
 
+		var profileData = scores; //JSON.stringify(scores);
+
+		console.log(profileData);
+		var query = `query CreateProfile($profileData: ProfileDataInput!){
+			createProfile(profileData: $profileData)
+		}`; 
+
+		fetch('http://localhost:4000/graphql', {
+			  method: 'POST',
+			  headers: {
+			    'Content-Type': 'application/json',
+			    'Accept': 'application/json',
+			    'Access-Control-Allow-Origin': '*',
+			  },
+			  body: JSON.stringify({
+			    query,
+			    variables: { profileData },
+			  })
+			}).then(r => r.json())
+			  .then(console.log("done"))
+			  .then(data => { 
+			  	localStorage.setItem("userHash", data.data.createProfile);
+			  	this.setState({redirect: true});
+			   });
+
 		return;
 	}
 
 	render() {
 		return (
 			<div id="MainWrapper">
+				{ this.state.redirect || localStorage.getItem("userHash") ? <Redirect to="/" /> : "" }
 				<Heading>It's simple</Heading>
 				<Text big>Arrange the cards in order, from <br /><Highlight>"most describes me"</Highlight> to <Highlight>"least describes me"</Highlight></Text>
 			

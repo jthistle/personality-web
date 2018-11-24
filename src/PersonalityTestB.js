@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Header, Button, Heading, Text, Highlight, Spacer } from './objects';
 import { Card, Slider } from './testObjectsB';
 import './App.css';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 var descriptors = require("./descriptors.json");
 
@@ -14,6 +14,7 @@ class PersonalityTestB extends Component {
 			responses: Array(),
 			order: Array(),
 			sliderValue: '50',
+			redirect: false,
 		}
 
 		this.handleMouseUp = this.handleMouseUp.bind(this);
@@ -24,7 +25,7 @@ class PersonalityTestB extends Component {
 		var savedResponses = JSON.parse(localStorage.getItem('testBResponses'));
 		var savedOrder = JSON.parse(localStorage.getItem('testBOrder'));
 
-		if (savedOrder) {
+		if (savedOrder && false) {
 			this.setState({
 				responses: ( savedResponses ? savedResponses : Array() ),
 				order: savedOrder,
@@ -88,8 +89,7 @@ class PersonalityTestB extends Component {
 		);
 	}
 
-	handleMouseUp(event) {
-		// TODO next card
+	handleMouseUp() {
 		var tempResponses = this.state.responses;
 		tempResponses.push(parseInt(this.state.sliderValue));
 		this.setState({
@@ -111,6 +111,9 @@ class PersonalityTestB extends Component {
 	}
 
 	saveChoices(){
+		if (this.state.redirect)
+			return;
+
 		// First, map responses to their respective attributes
 		var responsesByAttr = {
 			o: [],
@@ -145,12 +148,36 @@ class PersonalityTestB extends Component {
 
 		console.log(scores);
 
+		var profileData = scores;
+		var query = `query CreateProfile($profileData: ProfileDataInput!){
+			createProfile(profileData: $profileData)
+		}`; 
+
+		fetch('http://localhost:4000/graphql', {
+			  method: 'POST',
+			  headers: {
+			    'Content-Type': 'application/json',
+			    'Accept': 'application/json',
+			    'Access-Control-Allow-Origin': '*',
+			  },
+			  body: JSON.stringify({
+			    query,
+			    variables: { profileData },
+			  })
+			}).then(r => r.json())
+			  .then(console.log("done"))
+			  .then(data => { 
+			  	localStorage.setItem("userHash", data.data.createProfile);
+			  	this.setState({redirect: true});
+			   });
+
 		return;
 	}
 
 	render() {
 		return (
 			<div id="MainWrapper">
+				{ this.state.redirect || localStorage.getItem("userHash") ? <Redirect to="/" /> : "" }
 				<Heading>It's simple</Heading>
 				<Text big>
 					Slide the slider for each statement from<br />
