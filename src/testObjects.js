@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Heading, Text, Highlight } from "./objects";
+import { Button, Heading, Text, Highlight, Spacer } from "./objects";
 import 'array.prototype.move';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
@@ -17,65 +17,11 @@ const reorder = (list, startIndex, endIndex) => {
 class CardContainer extends Component {
 	constructor(props) {
 		super(props);
-
-		this.state = {
-			positions: Array(),
-		}
-
-		this.handleDragEnd = this.handleDragEnd.bind(this);
-	}
-
-	componentDidMount() {
-		var savedPos = JSON.parse(localStorage.getItem('testPositions'));
-
-		if (savedPos) {
-			this.setState({
-				positions: savedPos,
-			});
-		} else {
-			var tempPos = Array();
-			descriptors.statements.forEach (function(item, ind) {
-				tempPos.push(item.id);
-			});
-			this.setState({
-				positions: tempPos,
-			});
-		}		
-	}
-
-	handleDragEnd(result) {
-	    // dropped outside the list
-	    if(!result.destination) {
-	       return; 
-	    }
-	    
-	    this.move(result.source.index, result.destination.index);
-	    localStorage.setItem('testPositions', JSON.stringify(this.state.positions));
-	}
-
-	move(fromInd, toInd){
-		var pos = this.state.positions;
-
-		if (toInd >= 0 && toInd < pos.length && fromInd >= 0 && fromInd < pos.length) {
-			pos.move(fromInd, toInd);
-		}
-
-		this.setState({positions: pos});
-	}
-
-	moveTo(id, ind){
-		var pos = this.state.positions;
-
-		if (ind >= 0 && ind < pos.length) {
-			pos.move(pos.indexOf(id), ind);
-		}
-
-		this.setState({positions: pos});
 	}
 
 	populateCards() {
 		var cards = [];
-		this.state.positions.forEach( function(id, ind){
+		this.props.positions.forEach( function(id, ind){
 			var statement = descriptors.statements.find(function(el){
 				return el.id === id;
 			});
@@ -87,21 +33,20 @@ class CardContainer extends Component {
 
 	render() {
 		return (
-			<DragDropContext onDragEnd={this.handleDragEnd}>
+			<DragDropContext onDragEnd={ this.props.handleDragEnd }>
 				<div className="CardContainer">
 					<Text subtle>Most describes me</Text>
 					<Droppable droppableId="droppable">
 						{(provided, snapshot) => (
-				            <div
-				              ref={provided.innerRef}
-				            >
-				              { this.populateCards()
-				               }
-				              { provided.placeholder }
-				            </div>
-				          )}
+							<div
+							  ref={provided.innerRef}
+							>
+							  { this.populateCards()
+							   }
+							  { provided.placeholder }
+							</div>
+						  )}
 					</Droppable>
-					<Text subtle>Least describes me</Text>
 				</div>
 			</DragDropContext>
 		);
@@ -109,26 +54,60 @@ class CardContainer extends Component {
 } 
 
 class Card extends Component {
+	getSpacer(pos) {
+		var spacerText = ""
+		if (pos == 1) {
+			spacerText = "Really describes me";
+		} else if (pos == 3) {
+			spacerText = "Describes me very well";
+		} else if (pos == 6) {
+			spacerText = "Describes me well";
+		} else if (pos == 11) {
+			spacerText = "Possibly describes me";
+		} else if (pos == 17) {
+			spacerText = "Doesn't really describe me";
+		} else if (pos == 22) {
+			spacerText = "Only describes me sometimes";
+		} else if (pos == 25) {
+			spacerText = "Barely describes me";
+		} else if (pos == 27) {
+			spacerText = "Least describes me";
+		}
+
+		if (spacerText == "")
+			return "";
+
+		return (
+			<Spacer height="1">
+				<Text subtle>{ spacerText }</Text>
+			</Spacer>
+		);
+	}
+
 	render() {
 		return (
-
-			 <Draggable key={this.props.id} draggableId={this.props.id} index={this.props.pos}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  className="Card"
-                >
-                	<div className="CardPos">
-                		{ this.props.pos + 1 }
-                	</div>
-                  	{ this.props.children }
-                  	<div className="CardRight">
-                	</div>
-                </div>
-              )}
-            </Draggable>
+			<div>
+				<Draggable key={this.props.id} draggableId={this.props.id} index={this.props.pos}>
+					{(provided, snapshot) => (
+					<div
+					  ref={provided.innerRef}
+					  {...provided.draggableProps}
+					  {...provided.dragHandleProps}
+					  className="Card"
+					>
+						<div className="CardPos">
+							{ this.props.pos + 1 }
+						</div>
+						{ this.props.children }
+						<div className="CardRight">
+						</div>
+					</div>
+					)}
+				</Draggable>
+				{
+					this.getSpacer(this.props.pos)
+				}
+			</div>
 		);
 	}
 } 

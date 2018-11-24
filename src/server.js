@@ -5,6 +5,8 @@ var graphqlHTTP = require('express-graphql');
 var { buildSchema } = require('graphql');
 var mysql			= require('mysql');
 
+const crypto = require('crypto');
+
 var connection = mysql.createConnection({
 	host	 : 'localhost',
 	user	 : 'pers',
@@ -18,14 +20,33 @@ connection.connect();
 // Construct a schema, using GraphQL schema language
 var schema = buildSchema(`
 	type Query {
-	hello: String,
-	rollDice(numDice: Int!, numSides: Int): [Int],
-	profile(hash: String!): Profile,
+		hello: String,
+		rollDice(numDice: Int!, numSides: Int): [Int],
+		profile(hash: String!): Profile,
+		createProfile(profileData: ProfileDataInput!): String,
 	},
 	type Profile {
-	id: ID,
-	hash: String,
-	}
+		id: ID,
+		hash: String,
+		profileData: ProfileData,
+		#interactions: Interactions,
+	},
+	input ProfileDataInput {
+		o: Float,
+		c: Float,
+		e: Float,
+		a: Float,
+		n: Float,
+	},
+	type ProfileData {
+		o: Float,
+		c: Float,
+		e: Float,
+		a: Float,
+		n: Float,
+	},
+	#type Interactions {
+	#},
 `);
 
 // The root provides a resolver function for each API endpoint
@@ -46,9 +67,25 @@ var root = {
 	profile: ({hash}) => {
 		return new Promise((resolve, reject) => {
 			connection.query('SELECT * FROM profiles WHERE hash="'+hash+'" LIMIT 1', function (error, results, fields) {
-				if (error) return false;
+				if (error) reject(error);
 				console.log('Profile 1: ', results[0]);
-				resolve({id: results[0].id, hash: results[0].hash});
+				resolve({
+					id: results[0].id,
+					hash: results[0].hash,
+					profileData: JSON.parse(results[0].profileData),
+					//interactions: JSON.parse(results[0].interactions),
+				});
+			});
+		});
+	},
+
+	createProfile: ({profileData}) => {
+		return new Promise((resolve, reject) => {
+			var newHash = crypto.randomBytes(20).toString('hex');
+			var strData = JSON.stringify(profileData);
+			connection.query("INSERT INTO profiles (hash, profileData, interactions) VALUES ('"+newHash+"', '"+strData+"', '{}')", function (error, results, fields) {
+				if (error) reject(error);
+				resolve(newHash);
 			});
 		});
 	}
