@@ -25,7 +25,9 @@ class PersonalityTestB extends Component {
 		var savedResponses = JSON.parse(localStorage.getItem('testBResponses'));
 		var savedOrder = JSON.parse(localStorage.getItem('testBOrder'));
 
-		if (savedOrder && false) {
+		var numResponses = savedResponses ? savedResponses.length : 0;
+
+		if (savedOrder && numResponses < descriptors.statements.length) {
 			this.setState({
 				responses: ( savedResponses ? savedResponses : Array() ),
 				order: savedOrder,
@@ -38,12 +40,20 @@ class PersonalityTestB extends Component {
 
 			tempPos = this.shuffle(tempPos);
 			localStorage.setItem("testBOrder", JSON.stringify(tempPos));
+			localStorage.setItem("testBResponses", JSON.stringify(Array()));
 
 			this.setState({
 				responses: Array(), // [...Array(29).keys()] // for testing only 
 				order: tempPos,
 			});
-		}		
+		}
+
+		var selectedTest = localStorage.getItem("selectedTest");
+		if (! selectedTest || selectedTest != "testB") {
+			this.setState({
+				redirect: true,
+			})
+		} 
 	}
 
 	shuffle(array) {
@@ -149,8 +159,10 @@ class PersonalityTestB extends Component {
 		console.log(scores);
 
 		var profileData = scores;
-		var query = `query CreateProfile($profileData: ProfileDataInput!){
-			createProfile(profileData: $profileData)
+		var method = "b";
+
+		var query = `query CreateProfile($profileData: ProfileDataInput!, $method: String!){
+			createProfile(profileData: $profileData, method: $method)
 		}`; 
 
 		fetch('http://localhost:4000/graphql', {
@@ -162,13 +174,14 @@ class PersonalityTestB extends Component {
 			  },
 			  body: JSON.stringify({
 			    query,
-			    variables: { profileData },
+			    variables: { profileData, method },
 			  })
 			}).then(r => r.json())
 			  .then(console.log("done"))
 			  .then(data => { 
 			  	localStorage.setItem("userHash", data.data.createProfile);
 			  	this.setState({redirect: true});
+			  	window.location.reload();
 			   });
 
 		return;
@@ -188,7 +201,7 @@ class PersonalityTestB extends Component {
 						this.getCard()
 					}
 				</div>
-				<Spacer height="1" />
+				<Spacer height="8" />
 			</div>
 		);
 	}

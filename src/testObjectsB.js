@@ -46,10 +46,12 @@ class Slider extends Component {
 	render(){
 		return (
 			<div className="SliderBWrapper">
-				<input onMouseUp={ this.handleMouseUp } className="SliderB" 
-					id="slider" type="range" min={ this.props.min } max={ this.props.max } 
-					value={this.state.inputValue} onChange={evt => this.updateInputValue(evt)}
-					onKeyPress={this.handleKeyPress} />
+				<div style={{cursor: "pointer"}}>
+					<input className="SliderB" onTouchEnd={ this.handleMouseUp } onMouseUp={ this.handleMouseUp }
+						id="slider" type="range" min="0" max="100"
+						value={this.state.inputValue} onChange={evt => this.updateInputValue(evt)}
+						onKeyPress={this.handleKeyPress} />
+				</div>
 			</div>
     	);
    	}

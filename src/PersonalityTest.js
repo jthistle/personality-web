@@ -36,7 +36,14 @@ class PersonalityTest extends Component {
 			this.setState({
 				positions: tempPos,
 			});
-		}		
+		}
+
+		var selectedTest = localStorage.getItem("selectedTest");
+		if (! selectedTest || selectedTest != "test") {
+			this.setState({
+				redirect: true,
+			})
+		} 
 	}
 
 	shuffle(array) {
@@ -133,11 +140,12 @@ class PersonalityTest extends Component {
 
 		console.log(scores);
 
-		var profileData = scores; //JSON.stringify(scores);
+		var profileData = scores;
+		var method = "a";
 
 		console.log(profileData);
-		var query = `query CreateProfile($profileData: ProfileDataInput!){
-			createProfile(profileData: $profileData)
+		var query = `query CreateProfile($profileData: ProfileDataInput!, $method: String!){
+			createProfile(profileData: $profileData, method: $method)
 		}`; 
 
 		fetch('http://localhost:4000/graphql', {
@@ -149,13 +157,14 @@ class PersonalityTest extends Component {
 			  },
 			  body: JSON.stringify({
 			    query,
-			    variables: { profileData },
+			    variables: { profileData, method },
 			  })
 			}).then(r => r.json())
 			  .then(console.log("done"))
 			  .then(data => { 
 			  	localStorage.setItem("userHash", data.data.createProfile);
 			  	this.setState({redirect: true});
+			  	window.location.reload();
 			   });
 
 		return;

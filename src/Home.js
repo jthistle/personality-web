@@ -22,6 +22,7 @@ class Home extends Component {
 		// DEBUG: force a certain test
 		// localStorage.removeItem("selectedTest");
 		this.whichTest = "testB";
+		localStorage.setItem("selectedTest", this.whichTest);
 	}
 
 	render() {
@@ -32,6 +33,7 @@ class Home extends Component {
 				<Button big linkTo={ this.whichTest }>Take the quick personality test</Button>
 				<Spacer height="2" />
 				<Text big>Got an account already? Login in the top-right corner</Text>
+				<Spacer height="2" />
 			</div>
 		);
 	}
