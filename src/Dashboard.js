@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 
 
-class Home extends Component {
+class Dashboard extends Component {
 	constructor(props) {
 		super(props);
 		
@@ -28,15 +28,10 @@ class Home extends Component {
 	render() {
 		return (
 			<div id="MainWrapper">
-				<Heading>Contribute to <Highlight>new</Highlight> research into personality</Heading>
-				<Spacer height="2" />
-				<Button big linkTo={ this.whichTest }>Take the quick personality test</Button>
-				<Spacer height="2" />
-				<Text big>Got a profile already? Login in the top-right corner</Text>
-				<Spacer height="2" />
+				<Text big>Dashboard</Text>
 			</div>
 		);
 	}
 }
 
-export default Home;
+export default Dashboard;

@@ -4,6 +4,7 @@ var express = require('express');
 var graphqlHTTP = require('express-graphql');
 var { buildSchema } = require('graphql');
 var mysql			= require('mysql');
+var sanitizer = require('sanitize')();
 
 const crypto = require('crypto');
 
@@ -21,9 +22,9 @@ connection.connect();
 var schema = buildSchema(`
 	type Query {
 		hello: String,
-		rollDice(numDice: Int!, numSides: Int): [Int],
 		profile(hash: String!): Profile,
 		createProfile(profileData: ProfileDataInput!, method: String!): String,
+		setWaiting(hash: String!, isWaiting: Boolean!): Boolean,
 	},
 	type Profile {
 		id: ID,
@@ -55,18 +56,11 @@ var root = {
 		return 'Hello world!';
 	},
 
-	rollDice: ({numDice, numSides}) => {
-		console.log('Rolling dice');
-		var output = [];
-		for (var i = 0; i < numDice; i++) {
-			output.push(1 + Math.floor(Math.random() * (numSides || 6)));
-		}
-		return output;
-	},
-
 	profile: ({hash}) => {
 		return new Promise((resolve, reject) => {
-			connection.query('SELECT * FROM profiles WHERE hash="'+hash+'" LIMIT 1', function (error, results, fields) {
+			hash = sanitizer.value(hash, "string");
+
+			connection.query("SELECT * FROM profiles WHERE hash='"+hash+"' LIMIT 1", function (error, results, fields) {
 				if (error) {
 					reject(error);
 					return;
@@ -91,12 +85,27 @@ var root = {
 		return new Promise((resolve, reject) => {
 			var newHash = crypto.randomBytes(20).toString('hex');
 			var strData = JSON.stringify(profileData);
-			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES ('"+newHash+"', '"+strData+"', '"+method+"', '{}')", function (error, results, fields) {
+			strData = sanitizer.value(strData, "string");
+			method = sanitizer.value(method, "string");
+
+			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES ('"+newHash+"', '"+strData+"', '"+method+"', '{}');", function (error, results, fields) {
 				if (error) 
 					reject(error);
 				else
 					resolve(newHash);
 			});
+		});
+	},
+
+	setWaiting({hash, isWaiting}){
+		var value = isWaiting ? 1 : 0;
+		hash = sanitizer.value(hash, "string");
+
+		connection.query("UPDATE profiles SET isWaiting="+value+" WHERE hash='"+hash+";", function (error, results, fields) {
+			if (error) 
+				reject(error);
+			else
+				resolve(true);
 		});
 	}
 };

@@ -219,7 +219,7 @@ class Header extends Component {
 					<Button className="HeaderItem" linkTo="/" text="To Home" />
 				</HeaderItem>
 				<HeaderItem>
-					<Button className="HeaderItem" linkTo="dice" text="To Dice" />
+					<Button className="HeaderItem" linkTo="dashboard" text="To Dashboard" />
 				</HeaderItem>
 				<HeaderItem align="Right">
 					<LoggedIn />

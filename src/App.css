@@ -196,28 +196,6 @@ a {
   max-width: 1.2rem;
 }
 
-
-#DiceList {
-  list-style-type: none;
-  margin: auto;
-  width: 100%;
-  min-width: 15rem;
-  align-items: center;
-}
-
-#DiceList ul {
-  padding: 0;
-  width: 30%;
-  margin: auto;
-}
-
-#DiceList ul li {
-  list-style-type: none;
-  font-size: 1.5rem;
-  border-bottom: 1px solid #EEE;
-  padding: 1rem 0;
-}
-
 .Button {
   padding: 0.5rem;
   border-radius: 0.5rem;

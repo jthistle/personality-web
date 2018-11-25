@@ -5140,7 +5140,7 @@ lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
 
-"lodash@>=3.5 <5", lodash@^4.13.1, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4, lodash@^4.17.5:
+"lodash@>=3.5 <5", lodash@^4.13.1, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4, lodash@^4.17.5:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
 
@@ -7408,6 +7408,14 @@ sane@^2.0.0:
   optionalDependencies:
     fsevents "^1.2.3"
 
+sanitize@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/sanitize/-/sanitize-2.1.0.tgz#0fb0c4b3756c35e2d2f9324d954a5b35d1dde0bd"
+  integrity sha512-HLDVriFJnrm6ElDe2E8alAKDMZGMtM8CdKhvunp9592j8hNwZmmsmhk/t6WZbWonKJsHK0OoxH5S1Yoie4sSpw==
+  dependencies:
+    lodash "^4.17.0"
+    validator "^3.33.0"
+
 sass-loader@7.1.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-7.1.0.tgz#16fd5138cb8b424bf8a759528a1972d72aad069d"
@@ -8361,6 +8369,11 @@ validate-npm-package-license@^3.0.1:
   dependencies:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
+
+validator@^3.33.0:
+  version "3.43.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-3.43.0.tgz#96464b992d4196833d97a194bf40b19ff54bae05"
+  integrity sha1-lkZLmS1BloM9l6GUv0Cxn/VLrgU=
 
 value-equal@^0.4.0:
   version "0.4.0"
