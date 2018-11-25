@@ -56,22 +56,23 @@ class CardContainer extends Component {
 class Card extends Component {
 	getSpacer(pos) {
 		var spacerText = ""
+		var positionTexts = descriptors.positions;
 		if (pos == 1) {
-			spacerText = "Really describes me";
+			spacerText = positionTexts[1];
 		} else if (pos == 3) {
-			spacerText = "Describes me very well";
+			spacerText = positionTexts[2];
 		} else if (pos == 6) {
-			spacerText = "Describes me well";
+			spacerText = positionTexts[3];
 		} else if (pos == 11) {
-			spacerText = "Possibly describes me";
+			spacerText = positionTexts[4];
 		} else if (pos == 17) {
-			spacerText = "Doesn't really describe me";
+			spacerText = positionTexts[5];
 		} else if (pos == 22) {
-			spacerText = "Only describes me sometimes";
+			spacerText = positionTexts[6];
 		} else if (pos == 25) {
-			spacerText = "Barely describes me";
+			spacerText = positionTexts[7];
 		} else if (pos == 27) {
-			spacerText = "Least describes me";
+			spacerText = positionTexts[81];
 		}
 
 		if (spacerText == "")

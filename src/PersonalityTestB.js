@@ -74,6 +74,17 @@ class PersonalityTestB extends Component {
 		return array;
 	}
 
+	getSliderDesc(){
+		var positionTexts = descriptors.positions;
+
+		var toPick = Math.floor((100-parseInt(this.state.sliderValue))/(100/positionTexts.length));
+
+		if (toPick >= positionTexts.length)
+			toPick = positionTexts.length-1
+
+		return positionTexts[toPick];
+	}
+
 	getCard(){
 		var onCard = this.state.responses.length;
 
@@ -95,6 +106,7 @@ class PersonalityTestB extends Component {
 					{  newObj.text }
 				</div>
 				<Slider handleMouseUp={ this.handleMouseUp } updateSliderValue={ this.updateSliderValue } />
+				<div style={{ fontSize: "1.2rem" }}>{ this.getSliderDesc() }</div>
 			</Card>
 		);
 	}
@@ -104,13 +116,13 @@ class PersonalityTestB extends Component {
 		tempResponses.push(parseInt(this.state.sliderValue));
 		this.setState({
 			responses: tempResponses,
+			sliderValue: "50",
 		});
 
 		localStorage.setItem("testBResponses", JSON.stringify(tempResponses));
 
 		if (this.state.responses.length >= descriptors.statements.length) {
 			this.saveChoices();
-			// TODO and move on
 		}
 	}
 

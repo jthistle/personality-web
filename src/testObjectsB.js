@@ -30,9 +30,8 @@ class Slider extends Component {
 	}
 
 	updateInputValue(evt) {
-		this.props.updateSliderValue(evt.target.value);
-
 		if (! this.state.skipNextUpdate) {
+			this.props.updateSliderValue(evt.target.value);
 		    this.setState({
 		      inputValue: evt.target.value
 		    });

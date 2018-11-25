@@ -117,6 +117,10 @@ a {
   .HeaderItemRight {
     margin-left: auto;
   }
+
+  .CardB {
+    min-width: 10rem;
+  }
 }
 
 

@@ -150,5 +150,16 @@
 			"text": "I am aesthetically reactive",
 			"factor": "o"
 		}
+	],
+	"positions": [
+		"Most describes me",
+		"Really describes me",
+		"Describes me very well",
+		"Describes me well",
+		"Possibly describes me",
+		"Doesn't really describe me",
+		"Only describes me sometimes",
+		"Barely describes me",
+		"Least describes me"
 	]
 }
