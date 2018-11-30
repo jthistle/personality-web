@@ -58,7 +58,7 @@ var root = {
 
 	profile: ({hash}) => {
 		return new Promise((resolve, reject) => {
-			hash = sanitizer.value(hash, "string");
+			//hash = sanitizer.value(hash, "string");
 
 			connection.query("SELECT * FROM profiles WHERE hash='"+hash+"' LIMIT 1", function (error, results, fields) {
 				if (error) {
@@ -85,8 +85,8 @@ var root = {
 		return new Promise((resolve, reject) => {
 			var newHash = crypto.randomBytes(20).toString('hex');
 			var strData = JSON.stringify(profileData);
-			strData = sanitizer.value(strData, "string");
-			method = sanitizer.value(method, "string");
+			//strData = sanitizer.value(strData, "string");
+			//method = sanitizer.value(method, "string");
 
 			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES ('"+newHash+"', '"+strData+"', '"+method+"', '{}');", function (error, results, fields) {
 				if (error) 
@@ -99,7 +99,7 @@ var root = {
 
 	setWaiting({hash, isWaiting}){
 		var value = isWaiting ? 1 : 0;
-		hash = sanitizer.value(hash, "string");
+		//hash = sanitizer.value(hash, "string");
 
 		connection.query("UPDATE profiles SET isWaiting="+value+" WHERE hash='"+hash+";", function (error, results, fields) {
 			if (error) 

@@ -1,0 +1,21 @@
+.CardBWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.CardB {
+  margin-top: 2rem;
+  font-size: 2rem;
+  padding: 1rem;
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 1rem;
+  max-width: 30rem;
+  height: auto;
+}
+
+@media only screen and (min-width: 800px) {
+  .CardB {
+    min-width: 10rem;
+  }
+}

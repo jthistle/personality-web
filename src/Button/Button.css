@@ -1,0 +1,20 @@
+.Button {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid white;
+  background-color: var(--main-bg-color);
+  margin: auto;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.Button:hover {
+  background-color: #555;
+}
+
+.BigButton {
+  font-size: 2.5rem;
+  margin: 1rem auto;
+  padding: 1rem;
+}

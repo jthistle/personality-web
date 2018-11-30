@@ -1,0 +1,10 @@
+.Highlight {
+  background-color: rgba(0, 0, 0, 0.2);
+  font-style: italic;
+  padding: 0 0.8rem;
+  display: inline-block;
+}
+
+.BigText .Highlight {
+  margin-top: 0.2rem;
+}

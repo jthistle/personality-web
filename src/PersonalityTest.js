@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
-import { Header, Button, Heading, Text, Highlight, Spacer } from './objects';
-import { Card, CardContainer } from './testObjects';
+import { QUERY_VARS } from './config.js';
+import { Text } from './Text/Text.js';
+import { Heading } from './Heading/Heading.js';
+import { Spacer } from './Spacer/Spacer.js'; 
+import { Button } from './Button/Button.js';
+import { Highlight } from './Highlight/Highlight.js';
+import { CardContainer } from './TestObjects/TestA/CardContainer/CardContainer.js';
 import './App.css';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 var descriptors = require("./descriptors.json");
 
@@ -11,7 +16,7 @@ class PersonalityTest extends Component {
 		super(props);
 
 		this.state = {
-			positions: Array(),
+			positions: [],
 			redirect: false,
 		}
 
@@ -27,7 +32,7 @@ class PersonalityTest extends Component {
 				positions: savedPos,
 			});
 		} else {
-			var tempPos = Array();
+			var tempPos = [];
 			descriptors.statements.forEach (function(item, ind) {
 				tempPos.push(item.id);
 			});
@@ -39,7 +44,7 @@ class PersonalityTest extends Component {
 		}
 
 		var selectedTest = localStorage.getItem("selectedTest");
-		if (! selectedTest || selectedTest != "test") {
+		if (! selectedTest || selectedTest !== "test") {
 			this.setState({
 				redirect: true,
 			})
@@ -95,15 +100,15 @@ class PersonalityTest extends Component {
 		// 12
 
 		// Put the descriptors into an array based on position
-		var orderedDescriptors = Array();
+		var orderedDescriptors = [];
 		this.state.positions.forEach(function(id, pos){
 			orderedDescriptors.push(
-				descriptors.statements.find(x => x.id == id)
+				descriptors.statements.find(x => x.id === id)
 			);
 		});
 
 		var divisions = [2, 2, 3, 5, 6, 5, 3, 2, 2];
-		if (divisions.reduce((a, b) => a + b, 0) != 30) {
+		if (divisions.reduce((a, b) => a + b, 0) !== 30) {
 			alert("Divisions wrong!");
 			return;
 		}
@@ -142,30 +147,27 @@ class PersonalityTest extends Component {
 
 		var profileData = scores;
 		var method = "a";
+		var vars = { profileData, method };
 
 		console.log(profileData);
 		var query = `query CreateProfile($profileData: ProfileDataInput!, $method: String!){
 			createProfile(profileData: $profileData, method: $method)
 		}`; 
 
-		fetch('http://localhost:4000/graphql', {
-			  method: 'POST',
-			  headers: {
-			    'Content-Type': 'application/json',
-			    'Accept': 'application/json',
-			    'Access-Control-Allow-Origin': '*',
-			  },
-			  body: JSON.stringify({
-			    query,
-			    variables: { profileData, method },
-			  })
-			}).then(r => r.json())
-			  .then(console.log("done"))
-			  .then(data => { 
-			  	localStorage.setItem("userHash", data.data.createProfile);
-			  	this.setState({redirect: true});
-			  	window.location.reload();
-			   });
+		fetch(QUERY_VARS.url, {
+			method: QUERY_VARS.method,
+			headers: QUERY_VARS.headers,
+			body: JSON.stringify({
+		    	query,
+		    	variables: vars,
+		  	})
+		}).then(r => r.json())
+		  .then(console.log("done"))
+		  .then(data => {
+		  	localStorage.setItem("userHash", data.data.createProfile);
+		  	this.setState({redirect: true});
+		  	window.location.reload();
+		   });
 
 		return;
 	}

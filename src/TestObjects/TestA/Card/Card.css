@@ -1,0 +1,20 @@
+.Card {
+  display: flex;
+  justify-content: space-between;
+  width: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+  border-radius: 0.5rem;
+  margin: auto;
+  margin: 0.4rem 0;
+}
+
+.Card .CardPos {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.Card .CardRight {
+  content: "";
+}

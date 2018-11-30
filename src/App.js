@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { Header, Button } from './objects';
+import { Header } from './Header/Header.js';
 import Home from './Home';
 import PersonalityTest from './PersonalityTest';
 import PersonalityTestB from './PersonalityTestB';
 import Dashboard from './Dashboard';
 import './App.css';
-import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
+import { Switch, Route, withRouter } from 'react-router-dom';
 
 class App extends Component {
 	render() {

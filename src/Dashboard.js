@@ -1,34 +1,34 @@
 import React, { Component } from 'react';
-import { Header, Button, Heading, Highlight, Text, Spacer } from './objects';
+import { Text } from './Text/Text.js';
+import { Heading } from './Heading/Heading.js';
+import { Spacer } from './Spacer/Spacer.js'; 
+import { Button } from './Button/Button.js';
+import { Highlight } from './Highlight/Highlight.js';
 import './App.css';
 import { Link } from 'react-router-dom';
-
-
 
 class Dashboard extends Component {
 	constructor(props) {
 		super(props);
 		
-		
-		var selectedTest = localStorage.getItem("selectedTest");
-
-		if (selectedTest){
-			this.whichTest = selectedTest;
-		} else {
-			this.whichTest = (Math.random() >= 0.5 ? "test" : "testB");
-			localStorage.setItem("selectedTest", this.whichTest)
+		this.state = {
+			waiting: false,
 		}
+	}
 
-		// DEBUG: force a certain test
-		// localStorage.removeItem("selectedTest")
-		this.whichTest = "testB";
-		localStorage.setItem("selectedTest", this.whichTest);
+	toggleWaiting(){
+		return;
 	}
 
 	render() {
 		return (
 			<div id="MainWrapper">
-				<Text big>Dashboard</Text>
+				<Heading>Talk to <Highlight>other people</Highlight></Heading>
+				<Spacer height="1" />
+				<Text>After you finish talking you'll be given the opportunity to 
+				say who you liked the most and who you disliked the most.</Text>
+				<Spacer height="1" />
+				<Button big>Join the queue</Button>
 			</div>
 		);
 	}

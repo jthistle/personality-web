@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
-import { Header, Button, Heading, Text, Highlight, Spacer } from './objects';
-import { Card, Slider } from './testObjectsB';
+import { QUERY_VARS } from './config.js';
+import { Card } from './TestObjects/TestB/Card/Card.js'
+import { Slider } from './TestObjects/TestB/Slider/Slider.js'
+import { Text } from './Text/Text.js';
+import { Heading } from './Heading/Heading.js';
+import { Spacer } from './Spacer/Spacer.js';
+import { Highlight } from './Highlight/Highlight.js';
 import './App.css';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 var descriptors = require("./descriptors.json");
 
@@ -11,8 +16,8 @@ class PersonalityTestB extends Component {
 		super(props);
 
 		this.state = {
-			responses: Array(),
-			order: Array(),
+			responses: [],
+			order: [],
 			sliderValue: '50',
 			redirect: false,
 		}
@@ -29,27 +34,27 @@ class PersonalityTestB extends Component {
 
 		if (savedOrder && numResponses < descriptors.statements.length) {
 			this.setState({
-				responses: ( savedResponses ? savedResponses : Array() ),
+				responses: ( savedResponses ? savedResponses : [] ),
 				order: savedOrder,
 			});
 		} else {
-			var tempPos = Array();
+			var tempPos = [];
 			descriptors.statements.forEach (function(item, ind) {
 				tempPos.push(item.id);
 			});
 
 			tempPos = this.shuffle(tempPos);
 			localStorage.setItem("testBOrder", JSON.stringify(tempPos));
-			localStorage.setItem("testBResponses", JSON.stringify(Array()));
+			localStorage.setItem("testBResponses", JSON.stringify([]));
 
 			this.setState({
-				responses: Array(), // [...Array(29).keys()] // for testing only 
+				responses: [], // [...Array(29).keys()] // for testing only 
 				order: tempPos,
 			});
 		}
 
 		var selectedTest = localStorage.getItem("selectedTest");
-		if (! selectedTest || selectedTest != "testB") {
+		if (! selectedTest || selectedTest !== "testB") {
 			this.setState({
 				redirect: true,
 			})
@@ -91,7 +96,7 @@ class PersonalityTestB extends Component {
 		if (onCard >= descriptors.statements.length)
 			return;
 
-		var onDesc = descriptors.statements.find(x => x.id == this.state.order[onCard]);
+		var onDesc = descriptors.statements.find(x => x.id === this.state.order[onCard]);
 
 		// I have absolutely no idea why, but onDesc can't be accessed without throwing
 		// a TypeError: undefined. So, instead just recreate the object :/
@@ -149,7 +154,7 @@ class PersonalityTestB extends Component {
 
 		this.state.responses.forEach(function(resp, ind){
 			var thisStatementId = order[ind];
-			var thisStatement = descriptors.statements.find(x => x.id == thisStatementId);
+			var thisStatement = descriptors.statements.find(x => x.id === thisStatementId);
 
 			responsesByAttr[thisStatement.factor].push(resp/100);
 		});
@@ -172,23 +177,20 @@ class PersonalityTestB extends Component {
 
 		var profileData = scores;
 		var method = "b";
+		var vars = {profileData, method}
 
 		var query = `query CreateProfile($profileData: ProfileDataInput!, $method: String!){
 			createProfile(profileData: $profileData, method: $method)
 		}`; 
 
-		fetch('http://localhost:4000/graphql', {
-			  method: 'POST',
-			  headers: {
-			    'Content-Type': 'application/json',
-			    'Accept': 'application/json',
-			    'Access-Control-Allow-Origin': '*',
-			  },
-			  body: JSON.stringify({
-			    query,
-			    variables: { profileData, method },
-			  })
-			}).then(r => r.json())
+		fetch(QUERY_VARS.url, {
+			method: QUERY_VARS.method,
+			headers: QUERY_VARS.headers,
+			body: JSON.stringify({
+		    	query,
+		    	variables: vars,
+		  	})
+		}).then(r => r.json())
 			  .then(console.log("done"))
 			  .then(data => { 
 			  	localStorage.setItem("userHash", data.data.createProfile);

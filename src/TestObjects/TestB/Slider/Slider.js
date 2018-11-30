@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Heading, Text, Highlight, Spacer } from "./objects";
-import 'array.prototype.move';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import './Slider.css';
 
 class Slider extends Component {
 	constructor(props){
@@ -56,14 +53,4 @@ class Slider extends Component {
    	}
 }
 
-class Card extends Component {
-	render() {
-		return (
-			<div className="CardB">
-				{ this.props.children }
-			</div>
-		);
-	}
-}
-
-export { Card, Slider };
+export { Slider };

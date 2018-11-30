@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Header, Button, Heading, Highlight, Text, Spacer } from './objects';
+import { Text } from './Text/Text.js';
+import { Heading } from './Heading/Heading.js';
+import { Spacer } from './Spacer/Spacer.js'; 
+import { Button } from './Button/Button.js';
+import { Highlight } from './Highlight/Highlight.js';
 import './App.css';
-import { Link } from 'react-router-dom';
-
-
 
 class Home extends Component {
 	constructor(props) {
@@ -21,8 +22,8 @@ class Home extends Component {
 
 		// DEBUG: force a certain test
 		// localStorage.removeItem("selectedTest")
-		this.whichTest = "testB";
-		localStorage.setItem("selectedTest", this.whichTest);
+		// this.whichTest = "test";
+		// localStorage.setItem("selectedTest", this.whichTest);
 	}
 
 	render() {

@@ -1,0 +1,30 @@
+.Header {
+  border-bottom: 1px solid white;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  width: 100%;
+  min-height: 3rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+@media only screen and (max-width: 600px) {
+	.Header {
+	    justify-content: center;
+	  }
+}
+
+@media only screen and (min-width: 800px) {
+  .HeaderItemRight {
+    margin-left: auto;
+  }
+}
+
+.Header .Title {
+  font-size: 2rem;
+  font-weight: normal;
+  padding: 0 2rem;
+}
