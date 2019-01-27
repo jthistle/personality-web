@@ -1,4 +1,4 @@
-const dbPwd = require('./secrets.js');
+/*const dbPwd = require('./secrets.js');*/
 
 var express = require('express');
 var graphqlHTTP = require('express-graphql');

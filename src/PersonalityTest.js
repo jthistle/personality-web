@@ -22,6 +22,7 @@ class PersonalityTest extends Component {
 
 		this.handleDragEnd = this.handleDragEnd.bind(this);
 		this.saveChoices = this.saveChoices.bind(this);
+		this.changeTest = this.changeTest.bind(this);
 	}
 
 	componentDidMount() {
@@ -87,6 +88,11 @@ class PersonalityTest extends Component {
 		}
 
 		this.setState({positions: pos});
+	}
+
+	changeTest(){
+		localStorage.setItem("selectedTest", "testB");
+		this.setState({redirect: true});
 	}
 
 	saveChoices(){
@@ -175,12 +181,15 @@ class PersonalityTest extends Component {
 	render() {
 		return (
 			<div id="MainWrapper">
-				{ this.state.redirect || localStorage.getItem("userHash") ? <Redirect to="/" /> : "" }
+				{ this.state.redirect || localStorage.getItem("userHash") ? <Redirect to="/testB" /> : "" }
 				<Heading>It's simple</Heading>
 				<Text big>Arrange the cards in order, from <br /><Highlight>"most describes me"</Highlight> to <Highlight>"least describes me"</Highlight></Text>
 			
 				<CardContainer positions={ this.state.positions } handleDragEnd={ this.handleDragEnd }>
 				</CardContainer>
+				<Button onClick={ this.changeTest }>
+					I don't like this test
+				</Button>
 				<Button onClick={ this.saveChoices }>
 					I'm finished
 				</Button>

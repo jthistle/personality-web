@@ -4,8 +4,12 @@ import { Heading } from './Heading/Heading.js';
 import { Spacer } from './Spacer/Spacer.js'; 
 import { Button } from './Button/Button.js';
 import { Highlight } from './Highlight/Highlight.js';
+import { Panel, PanelItem } from './Panel/Panel.js';
 import './App.css';
 import { Link } from 'react-router-dom';
+import { QUERY_VARS } from './config.js';
+
+var translations = require("./personalityTranslations.json");
 
 class Dashboard extends Component {
 	constructor(props) {
@@ -13,22 +17,90 @@ class Dashboard extends Component {
 		
 		this.state = {
 			waiting: false,
+			profile: {}
 		}
 	}
 
-	toggleWaiting(){
+	componentDidMount() {
+		this.getProfile();
+	}
+
+	getProfile() {
+		var hash = localStorage.getItem("userHash");
+		var vars = {hash};
+
+		var query = `query ProfileQuery($hash: String!) {
+			profile(hash: $hash) {
+				profileData {
+					o
+					c
+					e
+					a
+					n
+				}
+			}
+		}`; 
+
+		fetch(QUERY_VARS.url, {
+			method: QUERY_VARS.method,
+			headers: QUERY_VARS.headers,
+			body: JSON.stringify({
+		    	query,
+		    	variables: vars,
+		  	})
+		}).then(r => r.json())
+			.then(console.log("done"))
+			.then(data => { 
+				//console.log(data.data.profile.profileData);
+				this.setState({profile: data.data.profile.profileData});
+			});
+	}
+
+	personalityPanel() {
+		var panelItems = [];
+		for (var ind in this.state.profile) {
+			var facet = translations.facets[ind];
+			var fname = facet.name;
+			var fval = this.state.profile[ind];
+			var fdescriptor = "???";
+
+			// This relies on facet.descriptors being ordered by min value descending
+			for (var d of facet.descriptors) {
+				if (fval >= d.min) {
+					fdescriptor = d.text;
+					break;
+				}
+			}
+			panelItems.push(
+				<PanelItem key={ ind }>
+					{ fdescriptor }
+				</PanelItem>
+			);
+		}
+
+		return (
+			<Panel>
+				<PanelItem header>My Personality</PanelItem>
+				{ panelItems }
+			</Panel>
+		);
+	}
+
+	toggleWaiting() {
 		return;
 	}
 
 	render() {
 		return (
 			<div id="MainWrapper">
-				<Heading>Talk to <Highlight>other people</Highlight></Heading>
-				<Spacer height="1" />
-				<Text>After you finish talking you'll be given the opportunity to 
-				say who you liked the most and who you disliked the most.</Text>
-				<Spacer height="1" />
+				<Heading>Who you are</Heading>
+				<Text subtle>This is the best estimation of your personality based on your responses.</Text>
+				<Text>Join the queue to contribute to research into personality by talking to other
+				people who've taken this test.</Text>
+				<Spacer height="2" />
 				<Button big>Join the queue</Button>
+				{ this.personalityPanel() }
+				<Spacer height="1" />
 			</div>
 		);
 	}
