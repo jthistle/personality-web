@@ -39,3 +39,9 @@
 	padding: 0;
 	max-width: 50vw;
 }
+
+@media only screen and (max-width: 600px) {
+  .Panel {
+	max-width: 90vw;
+  }
+}

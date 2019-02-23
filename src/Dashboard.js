@@ -16,7 +16,6 @@ class Dashboard extends Component {
 		super(props);
 		
 		this.state = {
-			waiting: false,
 			profile: {}
 		}
 	}
@@ -80,7 +79,7 @@ class Dashboard extends Component {
 
 		return (
 			<Panel>
-				<PanelItem header>My Personality</PanelItem>
+				<PanelItem header>Your Personality</PanelItem>
 				{ panelItems }
 			</Panel>
 		);
@@ -95,10 +94,9 @@ class Dashboard extends Component {
 			<div id="MainWrapper">
 				<Heading>Who you are</Heading>
 				<Text subtle>This is the best estimation of your personality based on your responses.</Text>
-				<Text>Join the queue to contribute to research into personality by talking to other
-				people who've taken this test.</Text>
+				<Text>Click below to play a simple but devious game of trust, and help research into personality.</Text>
 				<Spacer height="2" />
-				<Button big>Join the queue</Button>
+				<Button big linkTo="lobby">Play now</Button>
 				{ this.personalityPanel() }
 				<Spacer height="1" />
 			</div>

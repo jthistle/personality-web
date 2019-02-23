@@ -26,3 +26,5 @@ secrets.js
 
 package-lock.json.bak
 .yarnclean
+
+/games

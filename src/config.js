@@ -1,5 +1,5 @@
 const QUERY_VARS = {
-	url: 'http://localhost:4000/graphql',
+	url: 'http://localhost:4000/graphql', 	// NOTE: change based on ip
 	method: 'POST',
 	headers: {
     	'Content-Type': 'application/json',

@@ -1,0 +1,10 @@
+.InfoTable {
+	display: inline-block;
+	margin-top: 1rem;
+}
+
+.InfoTable td {
+	padding: 0.5rem;
+	max-width: 10rem;
+	vertical-align: top;
+}

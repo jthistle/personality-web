@@ -58,7 +58,7 @@ class PersonalityTestB extends Component {
 			this.setState({
 				redirect: true,
 			})
-		} 
+		}
 	}
 
 	shuffle(array) {
@@ -173,8 +173,6 @@ class PersonalityTestB extends Component {
 			scores[ind] = resps.reduce((a, b) => a + b, 0)/resps.length;
 		}
 
-		console.log(scores);
-
 		var profileData = scores;
 		var method = "b";
 		var vars = {profileData, method}
@@ -195,7 +193,7 @@ class PersonalityTestB extends Component {
 			  .then(data => { 
 			  	localStorage.setItem("userHash", data.data.createProfile);
 			  	this.setState({redirect: true});
-			  	window.location.reload();
+			  	window.location.reload();	// HACK
 			   });
 
 		return;

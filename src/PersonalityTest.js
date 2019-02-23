@@ -172,7 +172,7 @@ class PersonalityTest extends Component {
 		  .then(data => {
 		  	localStorage.setItem("userHash", data.data.createProfile);
 		  	this.setState({redirect: true});
-		  	window.location.reload();
+		  	window.location.reload(); 	// HACK
 		   });
 
 		return;

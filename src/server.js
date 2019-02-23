@@ -25,6 +25,7 @@ var schema = buildSchema(`
 		profile(hash: String!): Profile,
 		createProfile(profileData: ProfileDataInput!, method: String!): String,
 		setWaiting(hash: String!, isWaiting: Boolean!): Boolean,
+		getWaitingCount: Int
 	},
 	type Profile {
 		id: ID,
@@ -49,6 +50,12 @@ var schema = buildSchema(`
 	#type Interactions {
 	#},
 `);
+
+var cachedWaitingTime = 0;
+var cachedWaiting = 0;
+
+// interval in seconds between waiting count updates
+var cachedWaitingInterval = 1;
 
 // The root provides a resolver function for each API endpoint
 var root = {
@@ -97,15 +104,37 @@ var root = {
 		});
 	},
 
-	setWaiting({hash, isWaiting}){
-		var value = isWaiting ? 1 : 0;
-		//hash = sanitizer.value(hash, "string");
+	setWaiting: ({hash, isWaiting}) => {
+		return new Promise((resolve, reject) => {
+			var value = isWaiting ? 1 : 0;
+			//hash = sanitizer.value(hash, "string");
 
-		connection.query("UPDATE profiles SET isWaiting="+value+" WHERE hash='"+hash+";", function (error, results, fields) {
-			if (error) 
-				reject(error);
-			else
-				resolve(true);
+			connection.query("UPDATE profiles SET isWaiting="+value+" WHERE hash='"+hash+"';", function (error, results, fields) {
+				if (error) 
+					reject(error);
+				else
+					resolve(true);
+			});
+		});
+	},
+
+	getWaitingCount: () => {
+		return new Promise((resolve, reject) => {
+			var currentTime = Date.now() / 1000;
+
+			if (cachedWaitingTime + cachedWaitingInterval > currentTime)
+				return cachedWaiting;
+
+			connection.query("SELECT COUNT(*) FROM profiles WHERE isWaiting=1;", function (error, results, fields) {
+				if (error)
+					reject(error);
+				else {
+					// Update cache values
+					cachedWaiting = results[0]["COUNT(*)"];
+					cachedWaitingTime = Date.now() / 1000;
+					resolve(cachedWaiting);
+				}
+			});
 		});
 	}
 };

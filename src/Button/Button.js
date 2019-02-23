@@ -9,7 +9,12 @@ class Button extends Component {
 
 	content() {
 		return (
-			<div className={ "Button"+ (this.props.big ? " BigButton" : "") } onClick={this.props.onClick}>
+			<div className={ 
+				"Button"+ (this.props.big ? " BigButton" : "") +
+				(this.props.active && this.props.cancel ? " ActiveCancelButton" : "") +
+				(this.props.active && !this.props.cancel ? " ActiveButton" : "") +
+				(this.props.makeactive ? " MakeActiveButton" : "")
+				} onClick={this.props.onClick}>
 				{ this.props.text }
 				{ this.props.children }
 			</div>

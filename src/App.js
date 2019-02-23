@@ -4,6 +4,8 @@ import Home from './Home';
 import PersonalityTest from './PersonalityTest';
 import PersonalityTestB from './PersonalityTestB';
 import Dashboard from './Dashboard';
+import Lobby from './Lobby';
+import Game from './Game';
 import './App.css';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
@@ -17,6 +19,8 @@ class App extends Component {
 	        <Route path='/test' component={ PersonalityTest } />
 	        <Route path='/testB' component={ PersonalityTestB } />
 	        <Route path='/dashboard' component={ Dashboard } />
+	        <Route path='/lobby' component={ Lobby } />
+	        <Route path='/game' component={ Game } />
 	      </Switch>
 	    </div>
 		)
