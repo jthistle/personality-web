@@ -48,15 +48,16 @@ var schema = buildSchema(`
 	#},
 `);
 
+// Some values are cached, since the amount of people waiting is
+// the same for every user.
 var cachedWaitingTime = 0;
 var cachedWaiting = 0;
-
-// interval in seconds between waiting count updates
-var cachedWaitingInterval = 1;
+const cachedWaitingInterval = 1; 	// interval in seconds between waiting count updates
 
 // The root provides a resolver function for each API endpoint
 var root = {
 	hello: () => {
+		// TODO remove
 		return 'Hello world!';
 	},
 
@@ -70,8 +71,7 @@ var root = {
 
 				if (results.length == 0) {
 					reject("Profile not found");
-				} else {	
-					console.log('Profile 1: ', results[0]);
+				} else {
 					resolve({
 						id: results[0].id,
 						hash: results[0].hash,
@@ -99,9 +99,9 @@ var root = {
 	setWaiting: ({hash, isWaiting}) => {
 		return new Promise((resolve, reject) => {
 			var value = isWaiting ? 1 : 0;
-			console.log("set waiting: "+value);
+			var currentTime = Math.floor(Date.now() / 1000);
 
-			connection.query("UPDATE profiles SET isWaiting="+value+" WHERE hash='"+hash+"';", function (error, results, fields) {
+			connection.query("UPDATE profiles SET isWaiting="+value+", lastWaitingUpdate="+currentTime+" WHERE hash='"+hash+"';", function (error, results, fields) {
 				if (error) 
 					reject(error);
 				else
@@ -117,7 +117,8 @@ var root = {
 			if (cachedWaitingTime + cachedWaitingInterval > currentTime)
 				resolve(cachedWaiting);
 
-			connection.query("SELECT COUNT(*) FROM profiles WHERE isWaiting=1;", function (error, results, fields) {
+			var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > "+Math.floor(currentTime-2)+";";
+			connection.query(query, function (error, results, fields) {
 				if (error)
 					reject(error);
 				else {
@@ -131,12 +132,7 @@ var root = {
 	}
 };
 
-function query() {
-
-}
-
 var app = express();
-
 app.use("/graphql", graphqlHTTP({
 	schema: schema,
 	rootValue: root,
