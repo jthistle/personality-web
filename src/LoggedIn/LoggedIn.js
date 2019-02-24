@@ -35,7 +35,6 @@ class LoggedIn extends Component {
 	}
 
 	doLogin(evt){
-		// fb5998adae0304fb0997c4c96191c5f35eb95543
 		var hash = this.textInput.current.value;
 		var query = `query Profile($hash: String!){
 			profile(hash: $hash) {
@@ -50,21 +49,21 @@ class LoggedIn extends Component {
 		    	query,
 		    	variables: { hash },
 		  	})
-		}).then(r => r.json())
-			  .then(console.log("done"))
-			  .then(data => {
-			  	if (data.errors) {
-			  		alert("An error occured");
-			  		return;
-			  		// TODO throw proper error
-			  	}
+		})
+		.then(r => r.json())
+		.then(data => {
+			if (data.errors) {
+				alert("An error occured");
+			  	return;
+			  	// TODO throw proper error
+			}
 
-			  	if (data.data.profile.hash) {
-			  		localStorage.setItem("userHash", data.data.profile.hash);
-			  	}
+			if (data.data.profile.hash) {
+				localStorage.setItem("userHash", data.data.profile.hash);
+			}
 
-			  	this.getUserHash();
-			   });
+			this.getUserHash();
+		});
 		return;
 	}
 

@@ -167,13 +167,14 @@ class PersonalityTest extends Component {
 		    	query,
 		    	variables: vars,
 		  	})
-		}).then(r => r.json())
-		  .then(console.log("done"))
-		  .then(data => {
+		})
+		.then(r => r.json())
+		.then(console.log("done"))
+		.then(data => {
 		  	localStorage.setItem("userHash", data.data.createProfile);
 		  	this.setState({redirect: true});
 		  	window.location.reload(); 	// HACK
-		   });
+		});
 
 		return;
 	}

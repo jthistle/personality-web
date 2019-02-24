@@ -8,7 +8,6 @@
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",
     "graphql": "^14.0.2",
-    "graphql-subscriptions": "^1.0.0",
     "node-mysql": "^0.4.2",
     "prop-types": "^15.6.2",
     "react": "^16.6.3",
@@ -17,8 +16,7 @@
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.1",
-    "sanitize": "^2.1.0",
-    "subscriptions-transport-ws": "^0.9.15"
+    "sanitize": "^2.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

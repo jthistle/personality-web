@@ -4,6 +4,7 @@ import { Button } from './Button/Button.js';
 import { Highlight } from './Highlight/Highlight.js';
 import { InfoTable } from './InfoTable/InfoTable.js';
 import { Spacer } from './Spacer/Spacer.js';
+import { Redirect } from 'react-router-dom';
 import './App.css';
 import { QUERY_VARS } from './config.js';
 
@@ -21,7 +22,8 @@ class Lobby extends Component {
 		this.state = {
 			waitingCount: 0,
 			isWaiting: false,
-			waitingTimer: null
+			waitingTimer: null,
+			inGame: false
 		}
 	}
 
@@ -44,20 +46,25 @@ class Lobby extends Component {
 		this.setState({ haveResponse: false });
 
 		var query;
-		var vars = {};
+		var vars = {
+			hash: localStorage.getItem("userHash")
+		}
 
 		if (this.state.isWaiting) {
 			query = `mutation GetUpdateWaitingCount($hash: String!, $isWaiting: Boolean!) {
-				setWaiting(hash: $hash, isWaiting: $isWaiting)
+				setWaiting(hash: $hash, isWaiting: $isWaiting) {
+					waitingCount
+					inGame
+				}
 			}`;
 			
-			vars = {
-				hash: localStorage.getItem("userHash"),
-				isWaiting: true
-			}
+			vars.isWaiting = true;
 		} else {
-			query = `query GetWaitingCount {
-				getWaitingCount
+			query = `query GetWaitingCount($hash: String!) {
+				getWaitingCount(hash: $hash) {
+					waitingCount,
+					inGame
+				}
 			}`;
 		}
 
@@ -68,17 +75,24 @@ class Lobby extends Component {
 		    	query,
 		    	variables: vars
 		  	})
-		}).then(r => r.json())
-		  .then(data => { 
+		})
+		.then(r => r.json())
+		.then(data => { 
 		  	if (this.state.isWaiting) {
-		  		this.setState({ waitingCount: data.data.setWaiting });		  		
+		  		this.setState({ 
+		  			waitingCount: data.data.setWaiting.waitingCount,
+		  			inGame: data.data.setWaiting.inGame
+		  		});		  		
 		  	} else {
-		  		this.setState({ waitingCount: data.data.getWaitingCount });
+		  		this.setState({
+		  			waitingCount: data.data.getWaitingCount.waitingCount,
+		  			inGame: data.data.getWaitingCount.inGame
+		  		});	
 		  	}
-		   }).catch(function(e) {
+		}).catch(function(e) {
 			this.setState({ isWaiting: false });
 		    console.log("Error" + e.message);
-			});
+		});
 	}
 
 	getWaitingCount() {
@@ -117,7 +131,9 @@ class Lobby extends Component {
 
 	makeWaitingRequest(val) {
 		var query = `mutation SetWaiting($hash: String!, $isWaiting: Boolean!){
-			setWaiting(hash: $hash, isWaiting: $isWaiting)
+			setWaiting(hash: $hash, isWaiting: $isWaiting) {
+				waitingCount
+			}
 		}`;
 
 		var vars = {
@@ -132,18 +148,20 @@ class Lobby extends Component {
 		    	query,
 		    	variables: vars
 		  	})
-		}).then(r => r.json())
-		  .then(data => {
+		})
+		.then(r => r.json())
+		.then(data => {
 			this.setState({ isWaiting: val });
-		   })
-		   .catch(function(e) {
+		})
+		.catch(function(e) {
 			console.log("Error" + e.message);
-		    });
+		});
 	}
 
 	render() {
 		return (
 		<div id="MainWrapper">
+			{ this.state.inGame ? <Redirect to="/game" /> : "" }
 			{ this.getButton() }
 			<span>{ this.getWaitingCount() }</span>
 			<Spacer height="1" />

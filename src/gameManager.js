@@ -29,6 +29,7 @@ class GameManager {
 		this.occupiedWaiters = [];	 // waiters who are being allocated a game, but don't have inGame set yet
 		this.gamesToCreate = [];
 		this.lockWaiters = false;
+		this.gamesList = {}; 	// games with id keys
 	}
 
 	makeQuery(query) {
@@ -87,8 +88,73 @@ class GameManager {
 		}
 	}
 
-	initGame() {
+	initGames() {
+		return; 	// TEMP - TODO make this work
+		for (var game of this.gamesToCreate) {
+			var query = "UPDATE profiles SET inGame=1 WHERE id IN ("+game.join()+");";
+			this.makeQuery(query).then((data) => {
 
+			}).catch((error) => {
+				console.log(error);
+			});
+		}
+	}
+
+	// Update the inGame status of all users
+	refreshInGame() {
+		var query = "SELECT id FROM profiles WHERE inGame=1;";
+		this.makeQuery(query).then((data) => {
+			if (data.length === 0)
+				return;
+
+			var usersInGame = [];
+			for (var gameId in this.gamesList) {
+				var game = this.gamesList[gameId];
+				for (var id of game.users) {
+					usersInGame.push(id);
+				}
+			}
+
+			for (var user of data) {
+				console.log(user);
+				if (!usersInGame.includes(user.id)) {
+					// TODO set not ingame
+				}
+			}
+		});
+	}
+
+	refreshGamesList() {
+		return new Promise((resolve, reject) => {
+			var query = "SELECT * FROM games WHERE stage != 0;";
+			this.makeQuery(query).then((games) => {
+				this.gamesList = {};
+				for (var game of games) {
+					this.gamesList[game.id] = {
+						id: game.id,
+						users: JSON.parse(game.userids),
+						stage: game.stage,
+						hash: game.hash,
+						stagestart: game.stagestart,
+						coins: JSON.parse(game.coins),
+						userchoices: JSON.parse(game.userchoices)
+					}
+				}
+				resolve(true);
+			});
+		});
+	}
+
+	updateGame(id) {
+		var thisGame = this.gamesList[id];
+
+		var stage = thisGame.stage;
+		var stagestart = thisGame.stagestart;
+		var coins = JSON.stringify(thisGame.coins);
+		var userchoices = JSON.stringify(thisGame.userchoices);
+
+		var query = "UPDATE games SET stage="+stage+", stagestart="+stagestart+", coins='"+coins+"', userchoices='"+userchoices+"' WHERE id = "+id+";";
+		this.makeQuery(query);
 	}
 
 	wait(delay) {
@@ -101,11 +167,19 @@ class GameManager {
 			if (this.doQuit)
 				break;
 
+			await this.refreshGamesList();
+
+			this.refreshInGame();
+
+			this.updateGame(1);
+
 			this.findWaiting();
 			console.log(this.waiters);
 
 			this.matchUsers();
 			console.log(this.gamesToCreate);
+
+			//this.initGames();
 
 			// Wait so that we have at least a second in between loops
 			var remainingTime = 1000 - (Date.now() - startTime);

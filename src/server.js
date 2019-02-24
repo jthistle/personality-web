@@ -4,7 +4,6 @@ var graphqlHTTP		= require('express-graphql');
 var { buildSchema } = require('graphql');
 var mysql			= require('mysql');
 const crypto 		= require('crypto');
-const PubSub 	 	= require('graphql-subscriptions');
 
 var connection = mysql.createConnection({
 	host	 : 'localhost',
@@ -21,11 +20,11 @@ var schema = buildSchema(`
 	type Query {
 		hello: String,
 		profile(hash: String!): Profile,
-		getWaitingCount: Int
+		getWaitingCount(hash: String!): LobbyInfo
 	},
 	type Mutation {
 		createProfile(profileData: ProfileDataInput!, method: String!): String,
-		setWaiting(hash: String!, isWaiting: Boolean!): Int,
+		setWaiting(hash: String!, isWaiting: Boolean!): LobbyInfo,
 	},
 	type Profile {
 		id: ID,
@@ -47,8 +46,9 @@ var schema = buildSchema(`
 		a: Float,
 		n: Float,
 	},
-	type Subscription {
-		waitingCount: Int
+	type LobbyInfo {
+		waitingCount: Int,
+		inGame: Boolean,
 	}
 	#type Interactions {
 	#},
@@ -77,6 +77,17 @@ function updateWaitingCount() {
 				cachedWaitingTime = Date.now() / 1000;
 				resolve(cachedWaiting);
 			}
+		});
+	});
+}
+
+function getInGame(hash) {
+	return new Promise((resolve, reject) => {
+		connection.query("SELECT id FROM profiles WHERE hash='"+hash+"' AND inGame = 1 LIMIT 1;", function(error, results, fields) {
+			if (error)
+				reject(error);
+			else
+				resolve(results.length > 0);
 		});
 	});
 }
@@ -124,7 +135,7 @@ var root = {
 		});
 	},
 
-	setWaiting: ({hash, isWaiting}) => {
+	setWaiting: ({ hash, isWaiting }) => {
 		return new Promise((resolve, reject) => {
 			var value = isWaiting ? 1 : 0;
 			var currentTime = Math.floor(Date.now() / 1000);
@@ -134,19 +145,33 @@ var root = {
 					reject(error);
 				else {
 					updateWaitingCount().then((data) => {
-						resolve(data);
+						getInGame(hash).then((isInGame) => {
+							resolve({
+								waitingCount: data,
+								inGame: isInGame
+							});
+						});
 					});
 				}
 			});
 		});
 	},
 
-	getWaitingCount: () => {
-		return updateWaitingCount();
-	}
-};
+	getWaitingCount: ({ hash }) => {
+		return new Promise((resolve, reject) => {
+			updateWaitingCount().then((data) => {
+				getInGame(hash).then((isInGame) => {
+					resolve({
+						waitingCount: data,
+						inGame: isInGame
+					});
+				});
+			});
+		});
+	},
 
-var pubSub = new PubSub.PubSub();
+
+};
 
 var app = express();
 app.use("/graphql", graphqlHTTP({

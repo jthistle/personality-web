@@ -47,12 +47,13 @@ class Dashboard extends Component {
 		    	query,
 		    	variables: vars,
 		  	})
-		}).then(r => r.json())
-			.then(console.log("done"))
-			.then(data => { 
-				//console.log(data.data.profile.profileData);
-				this.setState({profile: data.data.profile.profileData});
-			});
+		})
+		.then(r => r.json())
+		.then(console.log("done"))
+		.then(data => { 
+			//console.log(data.data.profile.profileData);
+			this.setState({profile: data.data.profile.profileData});
+		});
 	}
 
 	personalityPanel() {
