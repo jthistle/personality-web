@@ -47,8 +47,7 @@ class Lobby extends Component {
 		var vars = {};
 
 		if (this.state.isWaiting) {
-			query = `query GetUpdateWaitingCount($hash: String!, $isWaiting: Boolean!) {
-				getWaitingCount
+			query = `mutation GetUpdateWaitingCount($hash: String!, $isWaiting: Boolean!) {
 				setWaiting(hash: $hash, isWaiting: $isWaiting)
 			}`;
 			
@@ -71,13 +70,14 @@ class Lobby extends Component {
 		  	})
 		}).then(r => r.json())
 		  .then(data => { 
-		  	this.setState({ waitingCount: data.data.getWaitingCount });
 		  	if (this.state.isWaiting) {
-		  		if (data.data.setWaiting !== true)
-					this.setState({ isWaiting: false });
+		  		this.setState({ waitingCount: data.data.setWaiting });		  		
+		  	} else {
+		  		this.setState({ waitingCount: data.data.getWaitingCount });
 		  	}
 		   }).catch(function(e) {
-			    console.log("Error" + e.message);
+			this.setState({ isWaiting: false });
+		    console.log("Error" + e.message);
 			});
 	}
 
@@ -116,7 +116,7 @@ class Lobby extends Component {
 	}
 
 	makeWaitingRequest(val) {
-		var query = `query SetWaiting($hash: String!, $isWaiting: Boolean!){
+		var query = `mutation SetWaiting($hash: String!, $isWaiting: Boolean!){
 			setWaiting(hash: $hash, isWaiting: $isWaiting)
 		}`;
 
@@ -134,8 +134,7 @@ class Lobby extends Component {
 		  	})
 		}).then(r => r.json())
 		  .then(data => {
-		  	if (data.data.setWaiting === true)
-				this.setState({ isWaiting: val });
+			this.setState({ isWaiting: val });
 		   })
 		   .catch(function(e) {
 			console.log("Error" + e.message);

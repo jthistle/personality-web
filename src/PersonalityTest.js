@@ -156,7 +156,7 @@ class PersonalityTest extends Component {
 		var vars = { profileData, method };
 
 		console.log(profileData);
-		var query = `query CreateProfile($profileData: ProfileDataInput!, $method: String!){
+		var query = `mutation CreateProfile($profileData: ProfileDataInput!, $method: String!){
 			createProfile(profileData: $profileData, method: $method)
 		}`; 
 

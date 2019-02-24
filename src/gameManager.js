@@ -7,6 +7,8 @@ const secrets 		= require('./secrets.js');
 var mysql			= require('mysql');
 const crypto 		= require('crypto');
 
+// We're not going to bother with GraphQL for this, rather, just
+// connect directly to the database.
 var connection = mysql.createConnection({
 	host	 : 'localhost',
 	user	 : 'pers',

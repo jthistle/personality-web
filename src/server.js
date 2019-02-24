@@ -4,6 +4,7 @@ var graphqlHTTP		= require('express-graphql');
 var { buildSchema } = require('graphql');
 var mysql			= require('mysql');
 const crypto 		= require('crypto');
+const PubSub 	 	= require('graphql-subscriptions');
 
 var connection = mysql.createConnection({
 	host	 : 'localhost',
@@ -20,9 +21,11 @@ var schema = buildSchema(`
 	type Query {
 		hello: String,
 		profile(hash: String!): Profile,
-		createProfile(profileData: ProfileDataInput!, method: String!): String,
-		setWaiting(hash: String!, isWaiting: Boolean!): Boolean,
 		getWaitingCount: Int
+	},
+	type Mutation {
+		createProfile(profileData: ProfileDataInput!, method: String!): String,
+		setWaiting(hash: String!, isWaiting: Boolean!): Int,
 	},
 	type Profile {
 		id: ID,
@@ -44,6 +47,9 @@ var schema = buildSchema(`
 		a: Float,
 		n: Float,
 	},
+	type Subscription {
+		waitingCount: Int
+	}
 	#type Interactions {
 	#},
 `);
@@ -53,6 +59,27 @@ var schema = buildSchema(`
 var cachedWaitingTime = 0;
 var cachedWaiting = 0;
 const cachedWaitingInterval = 1; 	// interval in seconds between waiting count updates
+
+function updateWaitingCount() {
+	return new Promise((resolve, reject) => {
+		var currentTime = Date.now() / 1000;
+
+		if (cachedWaitingTime + cachedWaitingInterval > currentTime)
+			resolve(cachedWaiting);
+
+		var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > "+Math.floor(currentTime-2)+";";
+		connection.query(query, function (error, results, fields) {
+			if (error)
+				reject(error);
+			else {
+				// Update cache values
+				cachedWaiting = results[0]["COUNT(*)"];
+				cachedWaitingTime = Date.now() / 1000;
+				resolve(cachedWaiting);
+			}
+		});
+	});
+}
 
 // The root provides a resolver function for each API endpoint
 var root = {
@@ -90,8 +117,9 @@ var root = {
 			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES ('"+newHash+"', '"+strData+"', '"+method+"', '{}');", function (error, results, fields) {
 				if (error) 
 					reject(error);
-				else
+				else {
 					resolve(newHash);
+				}
 			});
 		});
 	},
@@ -104,33 +132,21 @@ var root = {
 			connection.query("UPDATE profiles SET isWaiting="+value+", lastWaitingUpdate="+currentTime+" WHERE hash='"+hash+"';", function (error, results, fields) {
 				if (error) 
 					reject(error);
-				else
-					resolve(true);
+				else {
+					updateWaitingCount().then((data) => {
+						resolve(data);
+					});
+				}
 			});
 		});
 	},
 
 	getWaitingCount: () => {
-		return new Promise((resolve, reject) => {
-			var currentTime = Date.now() / 1000;
-
-			if (cachedWaitingTime + cachedWaitingInterval > currentTime)
-				resolve(cachedWaiting);
-
-			var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > "+Math.floor(currentTime-2)+";";
-			connection.query(query, function (error, results, fields) {
-				if (error)
-					reject(error);
-				else {
-					// Update cache values
-					cachedWaiting = results[0]["COUNT(*)"];
-					cachedWaitingTime = Date.now() / 1000;
-					resolve(cachedWaiting);
-				}
-			});
-		});
+		return updateWaitingCount();
 	}
 };
+
+var pubSub = new PubSub.PubSub();
 
 var app = express();
 app.use("/graphql", graphqlHTTP({

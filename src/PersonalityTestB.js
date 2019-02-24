@@ -177,7 +177,7 @@ class PersonalityTestB extends Component {
 		var method = "b";
 		var vars = {profileData, method}
 
-		var query = `query CreateProfile($profileData: ProfileDataInput!, $method: String!){
+		var query = `mutation CreateProfile($profileData: ProfileDataInput!, $method: String!){
 			createProfile(profileData: $profileData, method: $method)
 		}`; 
 
