@@ -19,10 +19,18 @@ class Lobby extends Component {
 	}
 
 	componentDidMount() {
-		setInterval(this.queryWaiting.bind(this), 1000);
+		this.setState({
+			waitingTimer: setInterval(this.queryWaiting.bind(this), 1000)
+		});
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.state.waitingTimer);
 	}
 
 	queryWaiting() {
+		this.setState({ haveResponse: false });
+
 		var query = `query GetWaitingCount {
 			getWaitingCount
 		}`; 
@@ -36,7 +44,9 @@ class Lobby extends Component {
 		}).then(r => r.json())
 		  .then(data => { 
 		  	this.setState({ waitingCount: data.data.getWaitingCount });
-		   });
+		   }).catch(function(e) {
+			    console.log("Error" + e.message);
+			});
 	}
 
 	getWaitingCount() {
@@ -60,6 +70,8 @@ class Lobby extends Component {
 	}
 
 	toggleWaiting() {
+		console.log("toggle waiting");
+		console.log(this.state.isWaiting);
 		var query = `query SetWaiting($hash: String!, $isWaiting: Boolean!){
 			setWaiting(hash: $hash, isWaiting: $isWaiting)
 		}`;
@@ -78,9 +90,13 @@ class Lobby extends Component {
 		  	})
 		}).then(r => r.json())
 		  .then(data => {
+		  	console.log(data);
 		  	if (data.data.setWaiting === true)
 				this.setState({isWaiting: !this.state.isWaiting});
-		   });
+		   })
+		   .catch(function(e) {
+			console.log("Error" + e.message);
+		    });
 	}
 
 	render() {

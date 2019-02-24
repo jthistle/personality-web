@@ -1,17 +1,14 @@
-/*const dbPwd = require('./secrets.js');*/
-
-var express = require('express');
-var graphqlHTTP = require('express-graphql');
+const secrets 		= require('./secrets.js');
+var express 		= require('express');
+var graphqlHTTP		= require('express-graphql');
 var { buildSchema } = require('graphql');
 var mysql			= require('mysql');
-var sanitizer = require('sanitize')();
-
-const crypto = require('crypto');
+const crypto 		= require('crypto');
 
 var connection = mysql.createConnection({
 	host	 : 'localhost',
 	user	 : 'pers',
-	password : 'TestingDbPassword!',
+	password :  secrets.dbPwd,
 	database : 'personality'
 });
 
@@ -65,8 +62,6 @@ var root = {
 
 	profile: ({hash}) => {
 		return new Promise((resolve, reject) => {
-			//hash = sanitizer.value(hash, "string");
-
 			connection.query("SELECT * FROM profiles WHERE hash='"+hash+"' LIMIT 1", function (error, results, fields) {
 				if (error) {
 					reject(error);
@@ -92,9 +87,6 @@ var root = {
 		return new Promise((resolve, reject) => {
 			var newHash = crypto.randomBytes(20).toString('hex');
 			var strData = JSON.stringify(profileData);
-			//strData = sanitizer.value(strData, "string");
-			//method = sanitizer.value(method, "string");
-
 			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES ('"+newHash+"', '"+strData+"', '"+method+"', '{}');", function (error, results, fields) {
 				if (error) 
 					reject(error);
@@ -107,7 +99,7 @@ var root = {
 	setWaiting: ({hash, isWaiting}) => {
 		return new Promise((resolve, reject) => {
 			var value = isWaiting ? 1 : 0;
-			//hash = sanitizer.value(hash, "string");
+			console.log("set waiting: "+value);
 
 			connection.query("UPDATE profiles SET isWaiting="+value+" WHERE hash='"+hash+"';", function (error, results, fields) {
 				if (error) 
@@ -123,7 +115,7 @@ var root = {
 			var currentTime = Date.now() / 1000;
 
 			if (cachedWaitingTime + cachedWaitingInterval > currentTime)
-				return cachedWaiting;
+				resolve(cachedWaiting);
 
 			connection.query("SELECT COUNT(*) FROM profiles WHERE isWaiting=1;", function (error, results, fields) {
 				if (error)
@@ -145,17 +137,7 @@ function query() {
 
 var app = express();
 
-app.use("/graphql", function (req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Headers', 'access-control-allow-origin, Content-Type, Authorization, Content-Length, X-Requested-With');
-	res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-	res.header('Access-Control-Allow-Credentials', true);
-	if (req.method === 'OPTIONS') {
-		res.sendStatus(200);
-	} else {
-		next();
-	}
-}, graphqlHTTP({
+app.use("/graphql", graphqlHTTP({
 	schema: schema,
 	rootValue: root,
 	graphiql: true,
