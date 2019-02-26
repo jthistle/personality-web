@@ -26,17 +26,16 @@ class GameManager {
 		this.con = con;
 		this.doQuit = false;
 		this.waiters = [];
-		this.occupiedWaiters = [];	 // waiters who are being allocated a game, but don't have inGame set yet
-		this.gamesToCreate = [];
-		this.lockWaiters = false;
+		this.gamesToCreate = [];		// an array of arrays of users ids of users who are matched	
 		this.gamesList = {}; 	// games with id keys
 	}
 
+	// Helper function to make a query
 	makeQuery(query) {
 		return new Promise((resolve, reject) => {
 			this.con.query(query, function (error, results, fields) {
 				if (error) {
-					//console.error(error);
+					console.error(error);
 					reject(error);
 				} else {
 					resolve(results);
@@ -45,59 +44,99 @@ class GameManager {
 		});
 	}
 
+	userPendingGameCreation(id) {
+		for (var game of this.gamesToCreate) {
+			if (game.includes(id))
+				return true;
+		}
+		return false;
+	}
+
+	// Find all waiting users and put their ids in the waiters array
 	findWaiting() {
-		var currentTime = Date.now() / 1000;
-		var minTime = Math.floor(currentTime-2);
-		var query = "SELECT id, hash FROM profiles WHERE isWaiting = 1 AND inGame = 0 AND lastWaitingUpdate > "+minTime+";"
-		this.makeQuery(query)
-			.then((data) => {
-				this.lockWaiters = true;
-				this.waiters = [];
-				for (var i=0; i < data.length; i++) {
-					var id = data[i].id;
-					if (!this.occupiedWaiters.includes(id))
-						this.waiters.push(data[i].id);
-				}
-				this.lockWaiters = false;
-			}).catch((error) => {
-				console.error(error);
-			});
+		return new Promise((resolve, reject) => {
+			var currentTime = Date.now() / 1000;
+			var minTime = Math.floor(currentTime-2);
+			var query = "SELECT id, hash FROM profiles WHERE isWaiting = 1 AND inGame = 0 AND lastWaitingUpdate > "+minTime+";"
+			this.makeQuery(query)
+				.then((data) => {
+					this.waiters = [];
+					for (var i=0; i < data.length; i++) {
+						var id = data[i].id;
+						if (!this.userPendingGameCreation(id)) {
+							this.waiters.push(data[i].id);
+						}
+					}
+					resolve(true);
+				});
+		});
 	}
 
 	matchUsers() {
-		// Since findWaiting will update waiters asynchronously, we need to make sure it's not
-		// in the process of rebuilding it.
-		if (this.lockWaiters)
-			return false;
+		return new Promise((resolve, reject) => {
+			var currentGame = [];
+			while (this.waiters.length + currentGame.length >= MIN_USERS_PER_GAME) {
+				var ind = Math.floor(Math.random() * (this.waiters.length));
+				if (ind == this.waiters.length)
+					ind--;
 
-		var currentGame = [];
-		while (this.waiters.length + currentGame.length >= MIN_USERS_PER_GAME) {
-			var ind = Math.floor(Math.random() * (this.waiters.length));
-			if (ind == this.waiters.length)
-				ind--;
+				var userId = this.waiters[ind];
+				currentGame.push(userId);
+				this.waiters.splice(ind, 1);
 
-			var userId = this.waiters[ind];
-			currentGame.push(userId);
-			this.occupiedWaiters.push(userId);
-			this.waiters.splice(ind, 1);
-
-			if (currentGame.length == MAX_USERS_PER_GAME || this.waiters.length == 0) {
-				this.gamesToCreate.push(currentGame);
-				currentGame = [];
+				if (currentGame.length == MAX_USERS_PER_GAME || this.waiters.length == 0) {
+					this.gamesToCreate.push(currentGame);
+					currentGame = [];
+				}
 			}
-		}
+			resolve(true);
+		});
+	}
+
+	doMatchmaking() {
+		this.findWaiting().then(() => {
+			this.matchUsers().then(() => {
+				this.initGames();
+			});
+		});
 	}
 
 	initGames() {
-		return; 	// TEMP - TODO make this work
-		for (var game of this.gamesToCreate) {
-			var query = "UPDATE profiles SET inGame=1 WHERE id IN ("+game.join()+");";
-			this.makeQuery(query).then((data) => {
+		for (var i = 0; i < this.gamesToCreate.length; i++) {
+			var game = this.gamesToCreate[i];
+			var newHash = crypto.randomBytes(20).toString('hex');
+			var nowTime = Math.floor(Date.now()/1000);
+			var template = {};
+			for (var id of game) {
+				template[id] = 0;
+			}
+			var strTempl = JSON.stringify(template);
 
-			}).catch((error) => {
-				console.log(error);
+			var query = "INSERT INTO games (userids, stage, hash, stagestart, coins, userchoices)\
+					 VALUES ('"+game.join()+"', 0, '"+newHash+"', "+nowTime+", '"+strTempl+"', '"+strTempl+"')";
+			this.makeQuery(query).then((data) => {
+				var getId = "SELECT id FROM games WHERE hash = '"+newHash+"'";
+				this.makeQuery(getId).then((data) => {
+					// add game to local games list
+					var id = data[0].id;
+					this.gamesList[id] = {
+						id: id,
+						users: game,
+						stage: 0,
+						hash: newHash,
+						stagestart: nowTime,
+						coins: template,
+						userchoices: template
+					}
+				});
+
+				var setGame = "UPDATE profiles SET inGame=1, gameHash='"+newHash+"' WHERE id IN ("+game.join()+");";			
+				this.makeQuery(setGame);
 			});
 		}
+
+		// Games have been created, clear list
+		this.gamesToCreate = [];
 	}
 
 	// Update the inGame status of all users
@@ -107,6 +146,7 @@ class GameManager {
 			if (data.length === 0)
 				return;
 
+			// Get all users in a live game
 			var usersInGame = [];
 			for (var gameId in this.gamesList) {
 				var game = this.gamesList[gameId];
@@ -115,11 +155,21 @@ class GameManager {
 				}
 			}
 
+			// Iterate over users who have inGame set
+			var usersToReset = [];
 			for (var user of data) {
-				console.log(user);
 				if (!usersInGame.includes(user.id)) {
-					// TODO set not ingame
+					usersToReset.push(user.id);
 				}
+			}
+
+			// Set users who have inGame set but aren't in a live game
+			// to have inGame = 0.
+			if (usersToReset.length > 0) {
+				var query = "UPDATE profiles SET inGame=0 WHERE id IN ("+usersToReset.join()+");";
+				this.makeQuery(query).catch((error) => {
+					console.error(error);
+				});
 			}
 		});
 	}
@@ -171,15 +221,7 @@ class GameManager {
 
 			this.refreshInGame();
 
-			this.updateGame(1);
-
-			this.findWaiting();
-			console.log(this.waiters);
-
-			this.matchUsers();
-			console.log(this.gamesToCreate);
-
-			//this.initGames();
+			this.doMatchmaking();
 
 			// Wait so that we have at least a second in between loops
 			var remainingTime = 1000 - (Date.now() - startTime);
