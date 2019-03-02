@@ -21,6 +21,14 @@ connection.connect();
 const MAX_USERS_PER_GAME = 5;
 const MIN_USERS_PER_GAME = 3;
 
+const PREGAME_TIME = 30;
+const ROUND_TIME = 45;
+const POST_ROUND_TIME = 15;
+
+const ROUND_COUNT = 2; 		// TODO: change to 3 or >, 2 is for testing
+
+const HOLD_COIN_AMOUNT = 100;
+
 class GameManager {
 	constructor(con) {
 		this.con = con;
@@ -110,10 +118,11 @@ class GameManager {
 			for (var id of game) {
 				template[id] = 0;
 			}
+			var userIds = JSON.stringify(game);
 			var strTempl = JSON.stringify(template);
 
 			var query = "INSERT INTO games (userids, stage, hash, stagestart, coins, userchoices)\
-					 VALUES ('"+game.join()+"', 0, '"+newHash+"', "+nowTime+", '"+strTempl+"', '"+strTempl+"')";
+					 VALUES ('"+userIds+"', 1, '"+newHash+"', "+nowTime+", '"+strTempl+"', '"+strTempl+"')";
 			this.makeQuery(query).then((data) => {
 				var getId = "SELECT id FROM games WHERE hash = '"+newHash+"'";
 				this.makeQuery(getId).then((data) => {
@@ -122,7 +131,7 @@ class GameManager {
 					this.gamesList[id] = {
 						id: id,
 						users: game,
-						stage: 0,
+						stage: 1,
 						hash: newHash,
 						stagestart: nowTime,
 						coins: template,
@@ -207,10 +216,104 @@ class GameManager {
 		this.makeQuery(query);
 	}
 
+	// Go and update the clocks in all games etc
+	// 
+	// Stages are:
+	// 0 - game ended
+	// 1 - pregame
+	// 2 - round one play
+	// 3 - post-round one
+	// 4 - round two play etc.
+	// 
+	// When a game ends, users should be surveyed
+	// Choices:
+	// 0 - hold (default)
+	// 1 - split
+	// 2 - grab
+	updateGames() {
+		var currentTime = Math.floor(Date.now() / 1000);
+		for (var gameId in this.gamesList) {
+			var game = this.gamesList[gameId];
+
+			// We are in pregame
+			if (game.stage === 1) {
+				if (currentTime > game.stagestart + PREGAME_TIME) {
+					game.stage++;
+					game.stagestart = currentTime;
+					this.updateGame(gameId);
+				}
+			}
+			// We are in play
+			else if (game.stage % 2 === 0) {
+				if (currentTime > game.stagestart + ROUND_TIME) {
+					var grabbers = [];
+					var splitters = [];
+					var holders = [];
+
+					var jackpot = game.users.length * 2 * HOLD_COIN_AMOUNT;
+
+					// Populate user choice lists
+					for (var userId in game.userchoices) {
+						var choice = game.userchoices[userId];
+
+						if (choice === 0)
+							holders.push(userId);
+						else if (choice === 1)
+							splitters.push(userId);
+						else if (choice === 2)
+							grabbers.push(userId);
+						else
+							console.warning("invalid choice: " + choice);
+					}
+
+					// Give coins to grabbers and splitters
+					if (grabbers.length === 1) {
+						var winnerId = grabbers[0];
+						game.coins[winnerId] += jackpot;
+					} else if (splitters.length > 0) {
+						var winningEach = Math.floor(jackpot / splitters.length);
+						for (var splitterId of splitters) {
+							game.coins[splitterId] += winningEach;
+						}
+					}
+
+					// Give coins to holders
+					for (var holderId of holders)
+						game.coins[holderId] += HOLD_COIN_AMOUNT;
+
+					game.stage++;
+					game.stagestart = currentTime;
+					this.updateGame(gameId);
+				}
+			}
+			// We are in post-round
+			else if (game.stage % 2 === 1) {
+				if (currentTime > game.stagestart + POST_ROUND_TIME) {
+					// Check if we're finished
+					if ((game.stage - 1)/2 >= ROUND_COUNT) {
+						game.stage = 0;
+						game.stagestart = currentTime;
+					} else {
+						// Reset for new round
+						for (var userId in game.userchoices) {
+							game.userchoices[userId] = 0;
+						}
+
+						game.stage++;
+						game.stagestart = currentTime;
+					}
+					this.updateGame(gameId);
+				}
+			}
+		}
+	}
+
 	wait(delay) {
 		return new Promise(resolve => setTimeout(resolve, delay));
 	}
 
+	// This is async - so only call functions that can run side-by-side
+	// i.e. functions that use data that is independent of other functions
 	async run() {
 		while (true) {
 			var startTime = Date.now();
@@ -222,6 +325,8 @@ class GameManager {
 			this.refreshInGame();
 
 			this.doMatchmaking();
+
+			this.updateGames();
 
 			// Wait so that we have at least a second in between loops
 			var remainingTime = 1000 - (Date.now() - startTime);

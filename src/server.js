@@ -19,12 +19,13 @@ connection.connect();
 var schema = buildSchema(`
 	type Query {
 		hello: String,
-		profile(hash: String!): Profile,
-		getWaitingCount(hash: String!): LobbyInfo
+		profile(hash: String!): Profile!,
+		getWaitingCount(hash: String!): LobbyInfo!
 	},
 	type Mutation {
 		createProfile(profileData: ProfileDataInput!, method: String!): String,
-		setWaiting(hash: String!, isWaiting: Boolean!): LobbyInfo,
+		setWaiting(hash: String!, isWaiting: Boolean!): LobbyInfo!,
+		getGameDetails(hash: String!, userChoice: Int!): GameInfo!
 	},
 	type Profile {
 		id: ID,
@@ -49,6 +50,12 @@ var schema = buildSchema(`
 	type LobbyInfo {
 		waitingCount: Int,
 		inGame: Boolean,
+	},
+	type GameInfo {
+		gameStage: Int,
+		userChoices: [Int],
+		coins: [Int],
+		stageStart: Int
 	}
 	#type Interactions {
 	#},
@@ -170,7 +177,11 @@ var root = {
 		});
 	},
 
-
+	getGameDetails: ({ hash, userChoice }) => {
+		return new Promise((resolve, reject) => {
+			resolve(true);	// TODO
+		});
+	},
 };
 
 var app = express();
