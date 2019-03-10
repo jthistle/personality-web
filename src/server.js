@@ -53,8 +53,8 @@ var schema = buildSchema(`
 	},
 	type GameInfo {
 		gameStage: Int!,
-		userChoices: [Int],
-		coins: [Int]!,
+		userChoices: String,
+		coins: String!,
 		stageStart: Int!
 	}
 	#type Interactions {
@@ -177,6 +177,7 @@ var root = {
 		});
 	},
 
+	// This returns the user choices and coins as a json array
 	getGameDetails: ({ hash, userChoice }) => {
 		return new Promise((resolve, reject) => {
 			if (userChoice < 0 || userChoice > 2)
@@ -193,7 +194,7 @@ var root = {
 					}
 
 					var choices = JSON.parse(results[0].userChoices);
-					var coins = JSON.parse(results[0].coins);
+					var coins = results[0].coins;
 					var stage = results[0].stage;
 					var stageStart = results[0].stagestart;
 
@@ -209,7 +210,7 @@ var root = {
 						}
 
 					if (stage % 2 == 1 || stage == 0)
-						returnObj.userChoices = choices;
+						returnObj.userChoices = newUserChoices;
 
 					connection.query("UPDATE games SET userChoices='"+newUserChoices+"' WHERE hash='"+gameHash+"';", function (error, results, fields) {
 						if (error) {
