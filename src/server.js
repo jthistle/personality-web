@@ -52,10 +52,10 @@ var schema = buildSchema(`
 		inGame: Boolean,
 	},
 	type GameInfo {
-		gameStage: Int,
+		gameStage: Int!,
 		userChoices: [Int],
-		coins: [Int],
-		stageStart: Int
+		coins: [Int]!,
+		stageStart: Int!
 	}
 	#type Interactions {
 	#},
@@ -179,7 +179,47 @@ var root = {
 
 	getGameDetails: ({ hash, userChoice }) => {
 		return new Promise((resolve, reject) => {
-			resolve(true);	// TODO
+			if (userChoice < 0 || userChoice > 2)
+				return;
+
+			connection.query("SELECT id, gameHash FROM profiles WHERE hash='"+hash+"';", function (error, results, fields) {
+				var gameHash = results[0].gameHash;
+				var userId = results[0].id;
+
+				connection.query("SELECT stage, stagestart, coins, userChoices FROM games WHERE hash='"+gameHash+"';", function (error, results, fields) {
+					if (error) {
+						console.error(error);
+						reject(error);
+					}
+
+					var choices = JSON.parse(results[0].userChoices);
+					var coins = JSON.parse(results[0].coins);
+					var stage = results[0].stage;
+					var stageStart = results[0].stagestart;
+
+					// Set user choice
+					choices[userId] = userChoice;
+
+					var newUserChoices = JSON.stringify(choices);
+
+					var returnObj = {
+							coins: coins,
+							gameStage: stage,
+							stageStart: stageStart
+						}
+
+					if (stage % 2 == 1 || stage == 0)
+						returnObj.userChoices = choices;
+
+					connection.query("UPDATE games SET userChoices='"+newUserChoices+"' WHERE hash='"+gameHash+"';", function (error, results, fields) {
+						if (error) {
+							console.error(error);
+							reject(error);
+						} else
+							resolve(returnObj);
+					});
+				});
+			});
 		});
 	},
 };
