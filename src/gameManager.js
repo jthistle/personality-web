@@ -345,6 +345,8 @@ class GameManager {
 	}
 }
 
+console.log("Running game manager...");
+
 var manager = new GameManager(connection);
 
 manager.run();
