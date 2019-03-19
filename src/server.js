@@ -55,7 +55,8 @@ var schema = buildSchema(`
 		gameStage: Int!,
 		userChoices: String,
 		coins: String!,
-		stageStart: Int!
+		stageStart: Int!,
+		userId: Int!
 	}
 	#type Interactions {
 	#},
@@ -206,7 +207,8 @@ var root = {
 					var returnObj = {
 							coins: coins,
 							gameStage: stage,
-							stageStart: stageStart
+							stageStart: stageStart,
+							userId: userId
 						}
 
 					if (stage % 2 == 1 || stage == 0)

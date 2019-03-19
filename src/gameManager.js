@@ -21,7 +21,7 @@ connection.connect();
 const MAX_USERS_PER_GAME = 5;
 const MIN_USERS_PER_GAME = 3;
 
-const PREGAME_TIME = 30;
+const PREGAME_TIME = 15;
 const ROUND_TIME = 45;
 const POST_ROUND_TIME = 15;
 

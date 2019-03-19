@@ -17,6 +17,13 @@ class ChoiceItem extends Component {
 			grabHover: require("../resources/grabHover.svg"),
 		}
 
+		if (this.props.hold)
+			this.text = "Hold";
+		else if (this.props.split)
+			this.text = "Split";
+		else if (this.props.grab)
+			this.text = "Grab";
+
 		this.state = {
 			imageObj: this.images.holdDefault,
 			hover: false
@@ -84,8 +91,9 @@ class ChoiceItem extends Component {
 
 	render() {
 		return (
-			<div onMouseEnter={ this.setHover } onMouseLeave={ this.setNormalImage } onClick={ this.handleClick }>
-				<img src={ this.state.imageObj } alt={ this.text + " icon" } />
+			<div class="ChoiceItem" onMouseEnter={ this.setHover } onMouseLeave={ this.setNormalImage } onClick={ this.handleClick }>
+				<img src={ this.state.imageObj } alt={ this.text + " icon" } /><br />
+				{ this.text }
 			</div>
 		);
 	}
