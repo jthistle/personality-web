@@ -1,0 +1,57 @@
+.ChatPanel {
+	max-width: 25rem;
+	border: 1px solid #CCC;
+	border-radius: 0.5rem;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+	flex-direction: column;
+	text-align: left;
+}
+
+.ChatItem:nth-child(even) {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.ChatItem:nth-child(odd) {
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ChatItem {
+	padding: 0.5rem 1rem;
+	flex: 1;
+	border-bottom: 1px solid #777;
+}
+
+.ChatItem:first-child {
+	border-top-right-radius: 0.5rem;
+	border-top-left-radius: 0.5rem;
+	background: #008B8B;
+	font-weight: bold;
+	border-color: #CCC;
+}
+
+.ChatItem:last-child {
+	border-bottom: 0;
+	border-bottom-right-radius: 0.5rem;
+	border-bottom-left-radius: 0.5rem;
+}
+
+.ChatItem.ChatInput {
+	border: 0;
+	background-color: #DDD;
+	color: black;
+}
+
+.ChatInput::placeholder {
+	color: #444;
+	font-style: italic;
+}
+
+@media only screen and (max-width: 600px) {
+  .ChatPanel {
+	max-width: 90vw;
+  }
+}

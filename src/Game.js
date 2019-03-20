@@ -5,6 +5,7 @@ import { Button } from './Button/Button.js';
 import { Highlight } from './Highlight/Highlight.js';
 import { InfoTable } from './InfoTable/InfoTable.js';
 import { ChoiceItem } from './ChoiceItem/ChoiceItem.js';
+import { ChatPanel } from './ChatPanel/ChatPanel.js';
 import { Spacer } from './Spacer/Spacer.js';
 import './App.css';
 import { Link } from 'react-router-dom';
@@ -114,15 +115,18 @@ class Game extends Component {
 			return this.state.coins[b] - this.state.coins[a];
 		});
 
+		var place = 1;
 		for (var user of userIds) {
 			var id = unsortedIds.indexOf(user);
 			var colourStyle = { color: "#"+this.colours[id], fontWeight: "bold" };
 			var codename = this.codenames[id];
-			items.push(<tr>
-				<td><span style={ colourStyle }>{ codename } { this.state.userId == user ? "(you)" : "" }</span></td>
+
+			items.push(<tr style={ { textAlign: "left" } }>
+				<td style={ { fontWeight: "bold" } }>{ place }</td>
+				<td style={ colourStyle }>{ codename } { this.state.userId == user ? "(you)" : "" }</td>
 				<td>{ this.state.coins[user] }</td>
 				</tr>);
-			id++;
+			place++;
 		}
 
 		return items;
@@ -135,22 +139,27 @@ class Game extends Component {
 	render() {
 		return (
 		<div id="MainWrapper">
-			<Heading>{ this.stageCountdown() }</Heading>
-			<Text big>{ this.stageName() }</Text>
-			<Spacer height="0.5" />
-			<InfoTable>
-				<tr>
-					<td><ChoiceItem hold selected={ this.state.userChoice === 0 } clickCallback={ this.choiceClick } /></td>
-					<td><ChoiceItem split selected={ this.state.userChoice === 1 }  clickCallback={ this.choiceClick } /></td>
-					<td><ChoiceItem grab selected={ this.state.userChoice === 2 }  clickCallback={ this.choiceClick } /></td>
-				</tr>
-			</InfoTable>
-			<Spacer height="1" />
-			<Text big>Coins</Text>
-			<Spacer height="0.1" />
-			<InfoTable>
-				{ this.coinTable() }
-			</InfoTable>
+			<div>
+				<Heading>{ this.stageCountdown() }</Heading>
+				<Text big>{ this.stageName() }</Text>
+				<Spacer height="0.5" />
+				<InfoTable>
+					<tr>
+						<td><ChoiceItem hold selected={ this.state.userChoice === 0 } clickCallback={ this.choiceClick } /></td>
+						<td><ChoiceItem split selected={ this.state.userChoice === 1 }  clickCallback={ this.choiceClick } /></td>
+						<td><ChoiceItem grab selected={ this.state.userChoice === 2 }  clickCallback={ this.choiceClick } /></td>
+					</tr>
+				</InfoTable>
+				<Spacer height="1" />
+				<Text big>Coins</Text>
+				<Spacer height="0.1" />
+				<InfoTable>
+					{ this.coinTable() }
+				</InfoTable>
+			</div>
+			<div>
+				<ChatPanel />
+			</div>
 		</div>
 		);
 	}
