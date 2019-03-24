@@ -22,7 +22,7 @@ const MAX_USERS_PER_GAME = 5;
 const MIN_USERS_PER_GAME = 3;
 
 const PREGAME_TIME = 15;
-const ROUND_TIME = 45;
+const ROUND_TIME = 30;
 const POST_ROUND_TIME = 15;
 
 const ROUND_COUNT = 2; 		// TODO: change to 3 or >, 2 is for testing
@@ -236,7 +236,9 @@ class GameManager {
 			var game = this.gamesList[gameId];
 
 			// We are in pregame
-			if (game.stage === 1) {
+			if (game.stage === 0)
+				console.warn("We really shouldn't be at this point...");
+			else if (game.stage === 1) {
 				if (currentTime > game.stagestart + PREGAME_TIME) {
 					game.stage++;
 					game.stagestart = currentTime;
@@ -335,8 +337,12 @@ class GameManager {
 			}
 		}
 
+		cleanup();
+	}
+
+	cleanup() {
 		// Put any cleanup here
-		console.log("ended execution");
+		console.log("Manager: ended execution");
 		process.exit(0);
 	}
 
@@ -345,8 +351,16 @@ class GameManager {
 	}
 }
 
+
+
 console.log("Running game manager...");
 
 var manager = new GameManager(connection);
+
+process.on("SIGINT", () => {
+    console.log("\nExiting game manager for personality-web...");
+    manager.cleanup();
+    process.exit();
+});
 
 manager.run();

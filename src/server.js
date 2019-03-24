@@ -4,6 +4,7 @@ var graphqlHTTP		= require('express-graphql');
 var { buildSchema } = require('graphql');
 var mysql			= require('mysql');
 const crypto 		= require('crypto');
+const fs 		    = require('fs');
 
 var connection = mysql.createConnection({
 	host	 : 'localhost',
@@ -25,7 +26,8 @@ var schema = buildSchema(`
 	type Mutation {
 		createProfile(profileData: ProfileDataInput!, method: String!): String,
 		setWaiting(hash: String!, isWaiting: Boolean!): LobbyInfo!,
-		getGameDetails(hash: String!, userChoice: Int!): GameInfo!
+		getGameDetails(hash: String!, userChoice: Int!, offset: Int!): GameInfo!,
+		sendMessage(hash: String!, message: String!): Boolean
 	},
 	type Profile {
 		id: ID,
@@ -51,12 +53,18 @@ var schema = buildSchema(`
 		waitingCount: Int,
 		inGame: Boolean,
 	},
+	type Message {
+		userId: Int!,
+		text: String!
+	},
 	type GameInfo {
 		gameStage: Int!,
 		userChoices: String,
 		coins: String!,
 		stageStart: Int!,
-		userId: Int!
+		userId: Int!,
+		messages: [Message]!,
+		newOffset: Int!
 	}
 	#type Interactions {
 	#},
@@ -67,6 +75,13 @@ var schema = buildSchema(`
 var cachedWaitingTime = 0;
 var cachedWaiting = 0;
 const cachedWaitingInterval = 1; 	// interval in seconds between waiting count updates
+
+const chatsPath = "games/";
+const minMessageGap = 3; 	// seconds
+const maxMessageLen = 200;
+
+var cachedChats = {};
+var lastMessages = {};
 
 function updateWaitingCount() {
 	return new Promise((resolve, reject) => {
@@ -100,6 +115,31 @@ function getInGame(hash) {
 	});
 }
 
+function initChat(gameHash) {
+	// Init chat if not created
+	if (!(gameHash in cachedChats)) {
+		var chatPath = chatsPath + gameHash + ".txt";
+		var fd = fs.openSync(chatPath, "a+");
+		var thisChat = fs.readFileSync(chatPath, {encoding: "utf8"});
+		var tempChat;
+		if (thisChat != "") {
+			tempChat = JSON.parse(thisChat);
+		} else {
+			tempChat = [];
+		}
+
+		cachedChats[gameHash] = tempChat;
+	}
+}
+
+function writeChat(gameHash) {
+	if (gameHash in cachedChats) {
+		var chatPath = chatsPath + gameHash + ".txt";
+		fs.writeFileSync(chatPath, JSON.stringify(cachedChats[gameHash]));
+		console.log("wrote chat "+gameHash);
+	}
+}
+
 // The root provides a resolver function for each API endpoint
 var root = {
 	hello: () => {
@@ -107,9 +147,9 @@ var root = {
 		return 'Hello world!';
 	},
 
-	profile: ({hash}) => {
+	profile: ({ hash }) => {
 		return new Promise((resolve, reject) => {
-			connection.query("SELECT * FROM profiles WHERE hash='"+hash+"' LIMIT 1", function (error, results, fields) {
+			connection.query("SELECT * FROM profiles WHERE hash = ? LIMIT 1", [hash], function (error, results, fields) {
 				if (error) {
 					reject(error);
 					return;
@@ -129,11 +169,11 @@ var root = {
 		});
 	},
 
-	createProfile: ({profileData, method}) => {
+	createProfile: ({ profileData, method }) => {
 		return new Promise((resolve, reject) => {
 			var newHash = crypto.randomBytes(20).toString('hex');
 			var strData = JSON.stringify(profileData);
-			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES ('"+newHash+"', '"+strData+"', '"+method+"', '{}');", function (error, results, fields) {
+			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES (?, ?, ?, '{}');", [newHash, strData, method], function (error, results, fields) {
 				if (error) 
 					reject(error);
 				else {
@@ -148,7 +188,7 @@ var root = {
 			var value = isWaiting ? 1 : 0;
 			var currentTime = Math.floor(Date.now() / 1000);
 
-			connection.query("UPDATE profiles SET isWaiting="+value+", lastWaitingUpdate="+currentTime+" WHERE hash='"+hash+"';", function (error, results, fields) {
+			connection.query("UPDATE profiles SET isWaiting = ?, lastWaitingUpdate = ? WHERE hash = ?;", [value, currentTime, hash], function (error, results, fields) {
 				if (error) 
 					reject(error);
 				else {
@@ -179,16 +219,23 @@ var root = {
 	},
 
 	// This returns the user choices and coins as a json array
-	getGameDetails: ({ hash, userChoice }) => {
+	getGameDetails: ({ hash, userChoice, offset }) => {
 		return new Promise((resolve, reject) => {
 			if (userChoice < 0 || userChoice > 2)
 				return;
 
-			connection.query("SELECT id, gameHash FROM profiles WHERE hash='"+hash+"';", function (error, results, fields) {
+			connection.query("SELECT id, gameHash FROM profiles WHERE hash = ?;", [hash], function (error, results, fields) {
 				var gameHash = results[0].gameHash;
 				var userId = results[0].id;
 
-				connection.query("SELECT stage, stagestart, coins, userChoices FROM games WHERE hash='"+gameHash+"';", function (error, results, fields) {
+				initChat(gameHash);
+
+				var tempMessages = [];
+				if (cachedChats[gameHash].length > offset) {
+					tempMessages = cachedChats[gameHash].slice(offset, cachedChats.length);
+				}
+
+				connection.query("SELECT stage, stagestart, coins, userChoices FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
 					if (error) {
 						console.error(error);
 						reject(error);
@@ -205,16 +252,18 @@ var root = {
 					var newUserChoices = JSON.stringify(choices);
 
 					var returnObj = {
-							coins: coins,
-							gameStage: stage,
-							stageStart: stageStart,
-							userId: userId
-						}
+						coins: coins,
+						gameStage: stage,
+						stageStart: stageStart,
+						userId: userId,
+						messages: tempMessages,
+						newOffset: cachedChats[gameHash].length
+					}
 
 					if (stage % 2 == 1 || stage == 0)
 						returnObj.userChoices = newUserChoices;
 
-					connection.query("UPDATE games SET userChoices='"+newUserChoices+"' WHERE hash='"+gameHash+"';", function (error, results, fields) {
+					connection.query("UPDATE games SET userChoices = ? WHERE hash = ?;", [newUserChoices, gameHash], function (error, results, fields) {
 						if (error) {
 							console.error(error);
 							reject(error);
@@ -225,7 +274,43 @@ var root = {
 			});
 		});
 	},
+
+	sendMessage: ({ hash, message }) => {
+		return new Promise((resolve, reject) => {
+			var currentTime = Date.now() / 1000;
+			if (hash in lastMessages) {
+				if (currentTime - lastMessages[hash] < minMessageGap) {
+					// This is terminal, so do not continue
+					return resolve(false);
+				}
+			}
+
+			connection.query("SELECT id, gameHash FROM profiles WHERE hash = ?;", [hash], function (error, results, fields) {
+				var gameHash = results[0].gameHash;
+				var userId = results[0].id;
+
+				initChat(gameHash);
+
+				cachedChats[gameHash].push({ userId: userId, text: message.substring(0, maxMessageLen) });
+				lastMessages[hash] = currentTime;
+
+				//writeChat(gameHash);
+				resolve(true);
+			});
+		});
+	},
 };
+
+process.on("SIGINT", () => {
+    console.log("\nExiting server for personality-web...");
+
+    // write all chats
+    for (hash in cachedChats) {
+    	writeChat(hash);
+    }
+
+    process.exit();
+});
 
 var app = express();
 app.use("/graphql", graphqlHTTP({

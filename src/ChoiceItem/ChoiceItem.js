@@ -91,7 +91,7 @@ class ChoiceItem extends Component {
 
 	render() {
 		return (
-			<div class="ChoiceItem" onMouseEnter={ this.setHover } onMouseLeave={ this.setNormalImage } onClick={ this.handleClick }>
+			<div className="ChoiceItem" onMouseEnter={ this.setHover } onMouseLeave={ this.setNormalImage } onClick={ this.handleClick }>
 				<img src={ this.state.imageObj } alt={ this.text + " icon" } /><br />
 				{ this.text }
 			</div>
