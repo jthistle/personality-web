@@ -27,7 +27,8 @@ var schema = buildSchema(`
 		createProfile(profileData: ProfileDataInput!, method: String!): String,
 		setWaiting(hash: String!, isWaiting: Boolean!): LobbyInfo!,
 		getGameDetails(hash: String!, userChoice: Int!, offset: Int!): GameInfo!,
-		sendMessage(hash: String!, message: String!): Boolean
+		sendMessage(hash: String!, message: String!): Boolean,
+		sendOpinion(hash: String!, mostLiked: Boolean!, userId: Int!): Boolean
 	},
 	type Profile {
 		id: ID,
@@ -140,6 +141,22 @@ function writeChat(gameHash) {
 	}
 }
 
+function getGameHash(hash) {
+	return new Promise((resolve, reject) => {
+		connection.query("SELECT id, gameHash FROM profiles WHERE hash = ?;", [hash], function (error, results, fields) {
+			if (error)
+				return reject(error);
+
+			resolve(
+				{
+					gameHash: results[0].gameHash,
+					userId: results[0].id
+				}
+			);
+		});
+	});
+}
+
 // The root provides a resolver function for each API endpoint
 var root = {
 	hello: () => {
@@ -224,9 +241,9 @@ var root = {
 			if (userChoice < 0 || userChoice > 2)
 				return;
 
-			connection.query("SELECT id, gameHash FROM profiles WHERE hash = ?;", [hash], function (error, results, fields) {
-				var gameHash = results[0].gameHash;
-				var userId = results[0].id;
+			getGameHash(hash).then((data) => {
+				var gameHash = data.gameHash;
+				var userId = data.userId;
 
 				initChat(gameHash);
 
@@ -246,8 +263,9 @@ var root = {
 					var stage = results[0].stage;
 					var stageStart = results[0].stagestart;
 
-					// Set user choice
-					choices[userId] = userChoice;
+					// Set user choice, but only if we're in play
+					if (stage !== 0 && stage % 2 !== 1)
+						choices[userId] = userChoice;
 
 					var newUserChoices = JSON.stringify(choices);
 
@@ -285,9 +303,9 @@ var root = {
 				}
 			}
 
-			connection.query("SELECT id, gameHash FROM profiles WHERE hash = ?;", [hash], function (error, results, fields) {
-				var gameHash = results[0].gameHash;
-				var userId = results[0].id;
+			getGameHash(hash).then((data) => {
+				var gameHash = data.gameHash;
+				var userId = data.userId;
 
 				initChat(gameHash);
 
@@ -296,6 +314,42 @@ var root = {
 
 				//writeChat(gameHash);
 				resolve(true);
+			});
+		});
+	},
+
+	sendOpinion: ({ hash, mostLiked, userId }) => {
+		return new Promise((resolve, reject) => {
+			getGameHash(hash).then((data) => {
+				var gameHash = data.gameHash;
+				var chooserId = data.userId;
+
+				connection.query("SELECT opinions, userids FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
+					var ids = JSON.parse(results[0].userids);
+					if (!ids.includes(userId)) {
+						console.warn(userId + " not in " + ids);
+						return reject(false);
+					}
+
+					var opinions = JSON.parse(results[0].opinions);
+
+					if (!(chooserId.toString() in opinions))
+						opinions[chooserId.toString()] = {};
+
+					if (mostLiked)
+						opinions[chooserId.toString()].mostLiked = userId;
+					else
+						opinions[chooserId.toString()].leastLiked = userId;
+
+					opinions = JSON.stringify(opinions);
+
+					connection.query("UPDATE games SET opinions = ? WHERE hash = ?;", [opinions, gameHash], function (error, results, fields) {
+						if (error)
+							reject(false);
+						else
+							resolve(true);
+					});
+				});
 			});
 		});
 	},

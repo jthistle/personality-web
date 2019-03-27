@@ -182,6 +182,7 @@ class Lobby extends Component {
 					</tr>
 				</InfoTable>
 				<p>But be warned: if two or more people <b>grab</b>, the people grabbing get <Highlight>nothing</Highlight>, and splitters still split the jackpot.</p>
+				<Text big>Remember: talk to the other people!</Text>
 			</div>
 		</div>
 		);

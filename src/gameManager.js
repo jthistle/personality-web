@@ -21,6 +21,9 @@ connection.connect();
 const MAX_USERS_PER_GAME = 5;
 const MIN_USERS_PER_GAME = 3;
 
+// How long to wait once a number of users is met
+const WAITFOR = [0, 0, 30, 15, 0];
+
 const PREGAME_TIME = 15;
 const ROUND_TIME = 30;
 const POST_ROUND_TIME = 15;
@@ -36,6 +39,7 @@ class GameManager {
 		this.waiters = [];
 		this.gamesToCreate = [];		// an array of arrays of users ids of users who are matched	
 		this.gamesList = {}; 	// games with id keys
+		this.waitingForGameTime = {};
 	}
 
 	// Helper function to make a query
@@ -72,7 +76,10 @@ class GameManager {
 					for (var i=0; i < data.length; i++) {
 						var id = data[i].id;
 						if (!this.userPendingGameCreation(id)) {
-							this.waiters.push(data[i].id);
+							this.waiters.push(id);
+							if (!(id in this.waitingForGameTime)) {
+								this.waitingForGameTime[id] = currentTime;
+							}
 						}
 					}
 					resolve(true);
@@ -83,7 +90,34 @@ class GameManager {
 	matchUsers() {
 		return new Promise((resolve, reject) => {
 			var currentGame = [];
-			while (this.waiters.length + currentGame.length >= MIN_USERS_PER_GAME) {
+
+			var currentTime = Date.now()/1000;
+
+			var waitTime = 0;
+			var doMatch = false;
+			if (this.waiters.length >= MIN_USERS_PER_GAME && this.waiters.length < MAX_USERS_PER_GAME)
+				waitTime = WAITFOR[this.waiters.length - 1];
+			else if (this.waiters.length >= MAX_USERS_PER_GAME)
+				doMatch = true;
+
+			// Only match users if one has been waiting beyond the specified wait time
+			// This allows us to create larger games.
+			if (!doMatch) {
+				for (var id in this.waitingForGameTime) {
+					if (this.waiters.indexOf(parseInt(id)) === -1) {
+						delete this.waitingForGameTime[id];
+						continue;
+					}
+
+					var since = this.waitingForGameTime[id];
+					if (currentTime > since + waitTime) {
+						doMatch = true;
+						break;
+					}
+				}
+			}
+
+			while (doMatch && this.waiters.length + currentGame.length >= MIN_USERS_PER_GAME) {
 				var ind = Math.floor(Math.random() * (this.waiters.length));
 				if (ind == this.waiters.length)
 					ind--;
@@ -91,6 +125,7 @@ class GameManager {
 				var userId = this.waiters[ind];
 				currentGame.push(userId);
 				this.waiters.splice(ind, 1);
+				delete this.waitingForGameTime[userId];
 
 				if (currentGame.length == MAX_USERS_PER_GAME || this.waiters.length == 0) {
 					this.gamesToCreate.push(currentGame);

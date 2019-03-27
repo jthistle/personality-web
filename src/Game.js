@@ -6,6 +6,7 @@ import { Highlight } from './Highlight/Highlight.js';
 import { InfoTable } from './InfoTable/InfoTable.js';
 import { ChoiceItem } from './ChoiceItem/ChoiceItem.js';
 import { ChatPanel } from './ChatPanel/ChatPanel.js';
+import { OpinionView } from './OpinionView/OpinionView.js';
 import { Spacer } from './Spacer/Spacer.js';
 import './App.css';
 import { Link } from 'react-router-dom';
@@ -24,7 +25,8 @@ class Game extends Component {
 			userIds: [],
 			messages: [],
 			userId: -1,
-			messageOffset: 0
+			messageOffset: 0,
+			opinions: {}
 		}
 
 		this.colours = ["03b2fc", "18eb03", "E5F04C", "E23D75", "fc9f00"];
@@ -34,6 +36,7 @@ class Game extends Component {
 
 		this.choiceClick = this.choiceClick.bind(this);
 		this.chatPanelMessage = this.chatPanelMessage.bind(this);
+		this.opinionCallback = this.opinionCallback.bind(this);
 	}
 
 	componentDidMount() {
@@ -78,8 +81,9 @@ class Game extends Component {
 		  	})
 		})
 		.then(r => r.json())
-		.then(data => { 
+		.then(data => {
 			var gameDetails = data.data.getGameDetails;
+
 			var coins = JSON.parse(gameDetails.coins);
 
 			// Only update messages when necessary
@@ -174,12 +178,16 @@ class Game extends Component {
 		return Math.max(0, roundTime - (currentTime - this.state.stageStart));
 	}
 
+	isLastPostRound() {
+		return Math.floor(this.state.gameStage / 2) === this.roundCount;
+	}
+
 	stageName() {
 		if (this.state.gameStage === 0)
 			return "";
 		else if (this.state.gameStage % 2 === 0)
 			return "Round " + Math.ceil(this.state.gameStage / 2);
-		else if (Math.floor(this.state.gameStage / 2) === this.roundCount)
+		else if (this.isLastPostRound())
 			return "The final scores are in!";
 		else if (this.state.gameStage % 2 === 1)
 			return "Next: round " + Math.ceil(this.state.gameStage / 2);
@@ -230,6 +238,61 @@ class Game extends Component {
 		this.setState({userChoice: choiceId});
 	}
 
+	getChoiceTable() {
+		return (
+			<InfoTable>
+				<tr>
+					<td><ChoiceItem hold selected={ this.state.userChoice === 0 } clickCallback={ this.choiceClick } /></td>
+					<td><ChoiceItem split selected={ this.state.userChoice === 1 }  clickCallback={ this.choiceClick } /></td>
+					<td><ChoiceItem grab selected={ this.state.userChoice === 2 }  clickCallback={ this.choiceClick } /></td>
+				</tr>
+			</InfoTable>
+			);
+	}
+
+	// isMost is whether the choice is a 'most-liked' choice
+	opinionCallback(userId, isMost) {
+		var vars = {
+			hash: localStorage.getItem("userHash"),
+			mostLiked: isMost,
+			userId: parseInt(userId)
+		}
+
+		var query = `mutation SendOpinion($hash: String!, $mostLiked: Boolean!, $userId: Int!) {
+			sendOpinion(hash: $hash, mostLiked: $mostLiked, userId: $userId)
+		}`;
+
+		fetch(QUERY_VARS.url, {
+			method: QUERY_VARS.method,
+			headers: QUERY_VARS.headers,
+			body: JSON.stringify({
+		    	query,
+		    	variables: vars
+		  	})
+		})
+		.then(r => r.json())
+		.then(data => {
+			if (data.data.sendOpinion) {
+				var tempOpinions = this.state.opinions;
+
+				if (!(this.state.userId in tempOpinions))
+					tempOpinions[this.state.userId] = {}
+
+				if (isMost)
+					tempOpinions[this.state.userId].mostLiked = userId;
+				else
+					tempOpinions[this.state.userId].leastLiked = userId;
+
+				console.log(tempOpinions);
+
+				this.setState({
+					opinions: tempOpinions
+				});
+			}
+		});
+	}
+
+
 	render() {
 		return (
 		<div id="MainWrapper">
@@ -237,13 +300,12 @@ class Game extends Component {
 				<Heading>{ this.stageCountdown() }</Heading>
 				<Text big>{ this.stageName() }</Text>
 				<Spacer height="0.5" />
-				<InfoTable>
-					<tr>
-						<td><ChoiceItem hold selected={ this.state.userChoice === 0 } clickCallback={ this.choiceClick } /></td>
-						<td><ChoiceItem split selected={ this.state.userChoice === 1 }  clickCallback={ this.choiceClick } /></td>
-						<td><ChoiceItem grab selected={ this.state.userChoice === 2 }  clickCallback={ this.choiceClick } /></td>
-					</tr>
-				</InfoTable>
+				{ 
+					this.isLastPostRound() || this.state.gameStage === 0 ? 
+						<OpinionView codenames={ this.codenames } colours={ this.colours } userIds={ this.state.userIds }
+							userId={ this.state.userId } opinionCallback={ this.opinionCallback } opinions={ this.state.opinions } />
+						: this.getChoiceTable() 
+				}
 				<Spacer height="1" />
 				<Text big>Coins</Text>
 				<Spacer height="0.1" />
