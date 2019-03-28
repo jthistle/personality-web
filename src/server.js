@@ -272,8 +272,6 @@ var root = {
 
 					if (userId.toString() in opinions)
 						tempOpinion = opinions[userId.toString()];
-					else
-						console.log(userId + " for opinion not in opinions");
 
 					// Set user choice, but only if we're in play
 					if (stage !== 0 && stage % 2 !== 1)
@@ -345,14 +343,22 @@ var root = {
 					}
 
 					var opinions = JSON.parse(results[0].opinions);
+					var chooserKey = chooserId.toString();
 
 					if (!(chooserId.toString() in opinions))
-						opinions[chooserId.toString()] = {};
+						opinions[chooserKey] = {};
 
-					if (mostLiked)
-						opinions[chooserId.toString()].mostLiked = userId;
-					else
-						opinions[chooserId.toString()].leastLiked = userId;
+					if (mostLiked) {
+						if (opinions[chooserKey].leastLiked == userId)
+							opinions[chooserKey].leastLiked = null;
+
+						opinions[chooserKey].mostLiked = userId;
+					} else {
+						if (opinions[chooserKey].mostLiked == userId)
+							opinions[chooserKey].mostLiked = null;
+
+						opinions[chooserKey].leastLiked = userId;
+					}
 
 					opinions = JSON.stringify(opinions);
 

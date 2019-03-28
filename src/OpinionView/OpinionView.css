@@ -24,6 +24,14 @@
 	/*box-shadow: 0 0 3px #777;*/
 }
 
+.UserOption.Selected.Most {
+	box-shadow: 0 0 3px #32ff32;
+}
+
+.UserOption.Selected.Least {
+	box-shadow: 0 0 3px #ff0c35;
+}
+
 .UserOption:hover {
 	background-color: #222;
 	text-decoration: underline;

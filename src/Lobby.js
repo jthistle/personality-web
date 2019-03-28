@@ -28,6 +28,7 @@ class Lobby extends Component {
 	}
 
 	componentDidMount() {
+		this.queryWaiting();
 		this.setState({
 			waitingTimer: setInterval(this.queryWaiting.bind(this), 1000)
 		});

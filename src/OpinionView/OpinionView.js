@@ -13,7 +13,10 @@ class UserOption extends Component {
 
 	render() {
 		return (
-			<div onClick={ this.handleClick } className={ "UserOption" + (this.props.selected ? " Selected" : "") } style={ this.props.style }>
+			<div onClick={ this.handleClick } className={ 
+					"UserOption" + (this.props.selected ? " Selected" : "")
+					+ (this.props.isMost ? " Most": " Least")
+				} style={ this.props.style }>
 				{ this.props.codename }
 			</div>
 			);
@@ -43,7 +46,10 @@ class OpinionView extends Component {
 			else if (!isMost && "leastLiked" in userOpinion)
 				selected = (user == userOpinion.leastLiked);
 
-			var colourStyle = { color: "#"+this.props.colours[id] };
+			var colourStyle = { 
+				color: "#"+this.props.colours[id],
+			};
+
 			var codename = this.props.codenames[id];
 			otherUsers.push(<UserOption isMost={ isMost } codename={ codename } userId={ user }
 				style={ colourStyle } clickCallback={ this.props.opinionCallback } key={ user }

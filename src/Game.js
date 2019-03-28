@@ -172,9 +172,28 @@ class Game extends Component {
 	stageCountdown() {
 		var roundTime;
 
-		if (this.state.gameStage === 0)
+		if (this.state.gameStage === 0) {
+			var sortedIds = this.state.userIds.slice();	// duplicate array
+			sortedIds.sort((a, b) => {
+				return this.state.coins[b] - this.state.coins[a];
+			});
+
+			if (this.state.coins[sortedIds[0]] === this.state.coins[sortedIds[1]])
+				return "It's a draw!";
+			else {
+				var id = sortedIds[0];
+				var codeId = this.state.userIds.indexOf(id);
+				var style = {
+					color: "#" + this.colours[codeId],
+					fontWeight: "bold"
+				}
+				return (
+					<div><span style={ style }>{ this.codenames[codeId] }</span> has won!</div>
+				);
+			}
+
 			return "Game has ended!";
-		else if (this.state.gameStage % 2 === 1)
+		} else if (this.state.gameStage % 2 === 1)
 			roundTime = 15;
 		else
 			roundTime = 30;
@@ -202,7 +221,7 @@ class Game extends Component {
 		var items = [];
 
 		var userIds = this.state.userIds;
-		var sortedIds = userIds.slice(0);	// duplicate array
+		var sortedIds = userIds.slice();	// duplicate array
 		sortedIds.sort((a, b) => {
 			return this.state.coins[b] - this.state.coins[a];
 		});
