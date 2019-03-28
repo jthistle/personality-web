@@ -1,15 +1,15 @@
 .ChatPanel {
-	max-width: 25rem;
+	width: 25rem;
+	max-height: 30rem;
 	border: 1px solid #CCC;
 	border-radius: 0.5rem;
 	padding: 0;
-	margin: 0;
+	margin: 1rem 0;
 	display: flex;
 	align-items: stretch;
 	flex-wrap: nowrap;
 	flex-direction: column;
 	text-align: left;
-	max-height: 30rem;
 }
 
 .ChatMessages {
@@ -51,6 +51,7 @@
 	border: 0;
 	background-color: #DDD;
 	color: black;
+	font-size: 1rem;
 }
 
 .ChatInput::placeholder {
@@ -61,5 +62,6 @@
 @media only screen and (max-width: 600px) {
   .ChatPanel {
 	max-width: 90vw;
+	max-height: 18rem;
   }
 }

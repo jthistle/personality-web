@@ -15,6 +15,12 @@ This project is built with **yarn**.
 
 (TODO: make a script)
 
+1. Start the GraphQL server at src/server.js
+
+2. Start the game manager at src/gameManager.js
+
+3. Start the react server with `yarn`
+
 ## Contribution
 
 Since this is a closed project, I am unfortunately not allowed to accept contributions. Feel free, however
@@ -26,4 +32,4 @@ to fork, modify and/or run this code yourself. It's GPL for a reason.
 and then tries to quantify their personality from that. Then, it allows users to interact with a game, and a chat,
 and records responses from users as to who their favourite other person in their group was.
 
-**Can I contribute?**
+**Can I contribute?** No ^

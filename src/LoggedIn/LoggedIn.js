@@ -8,6 +8,7 @@ class LoggedIn extends Component {
 		super(props);
 
 		this.state = {
+			loggedInUpdated: false,
 			loggedIn: false,
 		}
 
@@ -25,13 +26,17 @@ class LoggedIn extends Component {
 
 	getUserHash(){
 		var userHash = localStorage.getItem('userHash');
+
 		if (userHash) {
 			this.textInput.current.defaultValue = userHash;
-			this.setState({ loggedIn: true, });
 		} else {
 			this.textInput.current.defaultValue = "";
-			this.setState({ loggedIn: false, });
 		}
+
+		this.setState({
+			loggedIn: !!userHash,
+			loggedInUpdated: true,
+		});
 	}
 
 	doLogin(evt){
@@ -83,7 +88,9 @@ class LoggedIn extends Component {
 		var loggedIn = this.state.loggedIn;
 		return (
 			<div>
-				{ ["/test", "/testB"].includes(this.props.location.pathname) && loggedIn ? 
+				{ ["/test", "/testB", "/"].includes(this.props.location.pathname) && loggedIn && this.state.loggedInUpdated ? 
+						<Redirect to="/dashboard" /> : "" }
+				{ ["/dashboard", "/lobby", "/game"].includes(this.props.location.pathname) && !loggedIn && this.state.loggedInUpdated ? 
 						<Redirect to="/" /> : "" }
 				<div style={ {display: "flex", alignItems: "center"} } >
 					<input className="LoggedIn"

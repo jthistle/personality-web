@@ -152,6 +152,9 @@ function getGameHash(hash) {
 			if (error)
 				return reject(error);
 
+			if (results.length === 0)
+				return reject(false);
+
 			resolve(
 				{
 					gameHash: results[0].gameHash,
@@ -171,6 +174,7 @@ var root = {
 
 	profile: ({ hash }) => {
 		return new Promise((resolve, reject) => {
+			console.log("Query: profile, "+ hash);
 			connection.query("SELECT * FROM profiles WHERE hash = ? LIMIT 1", [hash], function (error, results, fields) {
 				if (error) {
 					reject(error);
@@ -300,6 +304,8 @@ var root = {
 							resolve(returnObj);
 					});
 				});
+			}).catch(data => {
+				console.error("Error with getting game details.");
 			});
 		});
 	},
@@ -325,6 +331,8 @@ var root = {
 
 				//writeChat(gameHash);
 				resolve(true);
+			}).catch(data => {
+				console.error("Error with getting game details.");
 			});
 		});
 	},
@@ -369,6 +377,8 @@ var root = {
 							resolve(true);
 					});
 				});
+			}).catch(data => {
+				console.error("Error with getting game details.");
 			});
 		});
 	},

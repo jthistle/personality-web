@@ -203,7 +203,7 @@ class Game extends Component {
 	}
 
 	isLastPostRound() {
-		return Math.floor(this.state.gameStage / 2) === this.roundCount;
+		return (Math.floor(this.state.gameStage / 2) === this.roundCount) && this.state.gameStage % 2 === 1;
 	}
 
 	stageName() {
