@@ -35,14 +35,13 @@ class OpinionView extends Component {
 			if (user == this.props.userId)
 				continue;
 
+			// Work out from the user's opinion that has been passed which choices to highlight
 			var selected = false;
-			if (this.props.userId in this.props.opinions) {
-				var userOpinions = this.props.opinions[this.props.userId];
-				if (isMost && "mostLiked" in userOpinions)
-					selected = (user == userOpinions.mostLiked);
-				else if (!isMost && "leastLiked" in userOpinions)
-					selected = (user == userOpinions.leastLiked);
-			}
+			var userOpinion = this.props.opinion;
+			if (isMost && "mostLiked" in userOpinion)
+				selected = (user == userOpinion.mostLiked);
+			else if (!isMost && "leastLiked" in userOpinion)
+				selected = (user == userOpinion.leastLiked);
 
 			var colourStyle = { color: "#"+this.props.colours[id] };
 			var codename = this.props.codenames[id];

@@ -26,7 +26,7 @@ class Game extends Component {
 			messages: [],
 			userId: -1,
 			messageOffset: 0,
-			opinions: {}
+			opinion: {}
 		}
 
 		this.colours = ["03b2fc", "18eb03", "E5F04C", "E23D75", "fc9f00"];
@@ -69,6 +69,10 @@ class Game extends Component {
 					text
 				}
 				newOffset
+				opinion {
+					mostLiked
+					leastLiked
+				}
 			}
 		}`;
 
@@ -100,6 +104,7 @@ class Game extends Component {
 	  			coins: coins,
 	  			messageOffset: gameDetails.newOffset,
   				userId: gameDetails.userId,
+  				opinion: gameDetails.opinion
 	  		});
 
 	  		if ("userChoices" in gameDetails) {
@@ -273,20 +278,15 @@ class Game extends Component {
 		.then(r => r.json())
 		.then(data => {
 			if (data.data.sendOpinion) {
-				var tempOpinions = this.state.opinions;
-
-				if (!(this.state.userId in tempOpinions))
-					tempOpinions[this.state.userId] = {}
+				var tempOpinion = this.state.opinion;
 
 				if (isMost)
-					tempOpinions[this.state.userId].mostLiked = userId;
+					tempOpinion.mostLiked = userId;
 				else
-					tempOpinions[this.state.userId].leastLiked = userId;
-
-				console.log(tempOpinions);
+					tempOpinion.leastLiked = userId;
 
 				this.setState({
-					opinions: tempOpinions
+					opinion: tempOpinion
 				});
 			}
 		});
@@ -303,7 +303,7 @@ class Game extends Component {
 				{ 
 					this.isLastPostRound() || this.state.gameStage === 0 ? 
 						<OpinionView codenames={ this.codenames } colours={ this.colours } userIds={ this.state.userIds }
-							userId={ this.state.userId } opinionCallback={ this.opinionCallback } opinions={ this.state.opinions } />
+							userId={ this.state.userId } opinionCallback={ this.opinionCallback } opinion={ this.state.opinion } />
 						: this.getChoiceTable() 
 				}
 				<Spacer height="1" />

@@ -54,10 +54,6 @@ var schema = buildSchema(`
 		waitingCount: Int,
 		inGame: Boolean,
 	},
-	type Message {
-		userId: Int!,
-		text: String!
-	},
 	type GameInfo {
 		gameStage: Int!,
 		userChoices: String,
@@ -65,7 +61,16 @@ var schema = buildSchema(`
 		stageStart: Int!,
 		userId: Int!,
 		messages: [Message]!,
-		newOffset: Int!
+		newOffset: Int!,
+		opinion: Opinion
+	},
+	type Message {
+		userId: Int!,
+		text: String!
+	},
+	type Opinion {
+		mostLiked: Int,
+		leastLiked: Int
 	}
 	#type Interactions {
 	#},
@@ -252,7 +257,7 @@ var root = {
 					tempMessages = cachedChats[gameHash].slice(offset, cachedChats.length);
 				}
 
-				connection.query("SELECT stage, stagestart, coins, userChoices FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
+				connection.query("SELECT stage, stagestart, coins, userChoices, opinions FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
 					if (error) {
 						console.error(error);
 						reject(error);
@@ -262,6 +267,13 @@ var root = {
 					var coins = results[0].coins;
 					var stage = results[0].stage;
 					var stageStart = results[0].stagestart;
+					var opinions = JSON.parse(results[0].opinions);
+					var tempOpinion = {};
+
+					if (userId.toString() in opinions)
+						tempOpinion = opinions[userId.toString()];
+					else
+						console.log(userId + " for opinion not in opinions");
 
 					// Set user choice, but only if we're in play
 					if (stage !== 0 && stage % 2 !== 1)
@@ -275,7 +287,8 @@ var root = {
 						stageStart: stageStart,
 						userId: userId,
 						messages: tempMessages,
-						newOffset: cachedChats[gameHash].length
+						newOffset: cachedChats[gameHash].length,
+						opinion: tempOpinion
 					}
 
 					if (stage % 2 == 1 || stage == 0)
