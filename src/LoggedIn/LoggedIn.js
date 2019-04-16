@@ -12,16 +12,22 @@ class LoggedIn extends Component {
 			loggedIn: false,
 		}
 
+		this.inputKeyPress = this.inputKeyPress.bind(this);
 		this.doLogin = this.doLogin.bind(this);
 		this.doLogout = this.doLogout.bind(this);
 		this.copyToClipboard = this.copyToClipboard.bind(this);
 		this.textInput = React.createRef();
-
-		//localStorage.removeItem("userHash");
 	}
 
 	componentDidMount(){
 		this.getUserHash();
+	}
+
+	inputKeyPress(event) {
+		if (event.key !== "Enter")
+			return;
+
+		this.doLogin(event);
 	}
 
 	getUserHash(){
@@ -40,6 +46,8 @@ class LoggedIn extends Component {
 	}
 
 	doLogin(evt){
+		console.log("logging in");
+
 		var hash = this.textInput.current.value;
 		var query = `query Profile($hash: String!){
 			profile(hash: $hash) {
@@ -96,6 +104,7 @@ class LoggedIn extends Component {
 					<input className="LoggedIn"
 						placeholder={ loggedIn ? "" : "Not logged in" }
 					 	ref={this.textInput} 
+					 	onKeyPress={ this.inputKeyPress }
 					 />
 					<div onClick={ loggedIn ? this.copyToClipboard : this.doLogin } className="LoggedInCopyBtn">
 						<img src={ loggedIn ? require("../resources/copyIcon.svg") :

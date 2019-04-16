@@ -8,6 +8,7 @@ import { Panel, PanelItem } from './Panel/Panel.js';
 import './App.css';
 import { Link } from 'react-router-dom';
 import { QUERY_VARS } from './config.js';
+import { Redirect } from 'react-router-dom';
 
 var translations = require("./personalityTranslations.json");
 
@@ -16,7 +17,8 @@ class Dashboard extends Component {
 		super(props);
 		
 		this.state = {
-			profile: {}
+			profile: {},
+			redirect: false
 		}
 	}
 
@@ -37,6 +39,9 @@ class Dashboard extends Component {
 					a
 					n
 				}
+			},
+			getWaitingCount(hash: $hash) {
+				inGame
 			}
 		}`; 
 
@@ -52,7 +57,10 @@ class Dashboard extends Component {
 		.then(console.log("done"))
 		.then(data => { 
 			//console.log(data.data.profile.profileData);
-			this.setState({profile: data.data.profile.profileData});
+			this.setState({
+				profile: data.data.profile.profileData,
+				redirect: data.data.getWaitingCount.inGame 
+			});
 		});
 	}
 
@@ -93,6 +101,7 @@ class Dashboard extends Component {
 	render() {
 		return (
 			<div id="MainWrapper">
+				{ this.state.redirect ? <Redirect to="/game" /> : "" }
 				<Heading>Who you are</Heading>
 				<Text subtle>This is the best estimation of your personality based on your responses.</Text>
 				<Text>Click below to play a simple but devious game of trust, and help research into personality.</Text>

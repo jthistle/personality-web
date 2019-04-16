@@ -6,6 +6,7 @@
 const secrets 		= require('./secrets.js');
 var mysql			= require('mysql');
 const crypto 		= require('crypto');
+const questions 	= require("./questions.json");
 
 // We're not going to bother with GraphQL for this, rather, just
 // connect directly to the database.
@@ -22,13 +23,13 @@ const MAX_USERS_PER_GAME = 5;
 const MIN_USERS_PER_GAME = 3;
 
 // How long to wait once a number of users is met
-const WAITFOR = [0, 0, 30, 15, 0];
+const WAITFOR = [0, 0, 40, 20, 0];
 
 const PREGAME_TIME = 15;
-const ROUND_TIME = 30;
+const ROUND_TIME = 45;
 const POST_ROUND_TIME = 15;
 
-const ROUND_COUNT = 2; 		// TODO: change to 3 or >, 2 is for testing
+const ROUND_COUNT = 4; 		// TODO: change to 3 or >, 2 is for testing
 
 const HOLD_COIN_AMOUNT = 100;
 
@@ -102,7 +103,7 @@ class GameManager {
 
 			// Only match users if one has been waiting beyond the specified wait time
 			// This allows us to create larger games.
-			if (!doMatch) {
+			if (!doMatch && this.waiters.length >= MIN_USERS_PER_GAME) {
 				for (var id in this.waitingForGameTime) {
 					if (this.waiters.indexOf(parseInt(id)) === -1) {
 						delete this.waitingForGameTime[id];
@@ -111,6 +112,7 @@ class GameManager {
 
 					var since = this.waitingForGameTime[id];
 					if (currentTime > since + waitTime) {
+						console.log("User "+id+" has waited long enough, should match now");
 						doMatch = true;
 						break;
 					}
@@ -129,6 +131,7 @@ class GameManager {
 
 				if (currentGame.length == MAX_USERS_PER_GAME || this.waiters.length == 0) {
 					this.gamesToCreate.push(currentGame);
+					console.log("Matched users: "+ currentGame);
 					currentGame = [];
 				}
 			}
@@ -155,9 +158,10 @@ class GameManager {
 			}
 			var userIds = JSON.stringify(game);
 			var strTempl = JSON.stringify(template);
+			var question = questions[Math.floor(Math.random() * questions.length)]
 
-			var query = "INSERT INTO games (userids, stage, hash, stagestart, coins, userchoices)\
-					 VALUES ('"+userIds+"', 1, '"+newHash+"', "+nowTime+", '"+strTempl+"', '"+strTempl+"')";
+			var query = "INSERT INTO games (userids, stage, hash, stagestart, coins, userchoices, question)\
+					 VALUES ('"+userIds+"', 1, '"+newHash+"', "+nowTime+", '"+strTempl+"', '"+strTempl+"', '"+question+"')";
 			this.makeQuery(query).then((data) => {
 				var getId = "SELECT id FROM games WHERE hash = '"+newHash+"'";
 				this.makeQuery(getId).then((data) => {
@@ -176,6 +180,7 @@ class GameManager {
 
 				var setGame = "UPDATE profiles SET inGame=1, gameHash='"+newHash+"' WHERE id IN ("+game.join()+");";			
 				this.makeQuery(setGame);
+				console.log(newHash+": created game");
 			});
 		}
 
@@ -278,6 +283,7 @@ class GameManager {
 					game.stage++;
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
+					console.log(game.hash+": pregame over, starting");
 				}
 			}
 			// We are in play
@@ -321,6 +327,8 @@ class GameManager {
 					game.stage++;
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
+
+					console.log(game.hash+": moved to post-round, stage is now "+ game.stage);
 				}
 			}
 			// We are in post-round
@@ -340,6 +348,8 @@ class GameManager {
 						game.stagestart = currentTime;
 					}
 					this.updateGame(gameId);
+
+					console.log(game.hash+": moved to next round, stage is now "+ game.stage);
 				}
 			}
 		}

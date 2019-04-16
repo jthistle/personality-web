@@ -26,13 +26,14 @@ class Game extends Component {
 			messages: [],
 			userId: -1,
 			messageOffset: 0,
-			opinion: {}
+			opinion: {},
+			question: ""
 		}
 
 		this.colours = ["03b2fc", "18eb03", "E5F04C", "E23D75", "fc9f00"];
 		this.codenames = ["Alpha", "Bravo", "Charlie", "Delta", "Echo"];
 
-		this.roundCount = 2;
+		this.roundCount = 4;
 
 		this.choiceClick = this.choiceClick.bind(this);
 		this.chatPanelMessage = this.chatPanelMessage.bind(this);
@@ -73,6 +74,7 @@ class Game extends Component {
 					mostLiked
 					leastLiked
 				}
+				question
 			}
 		}`;
 
@@ -104,7 +106,8 @@ class Game extends Component {
 	  			coins: coins,
 	  			messageOffset: gameDetails.newOffset,
   				userId: gameDetails.userId,
-  				opinion: gameDetails.opinion
+  				opinion: gameDetails.opinion,
+  				question: gameDetails.question
 	  		});
 
 	  		if ("userChoices" in gameDetails) {
@@ -196,7 +199,7 @@ class Game extends Component {
 		} else if (this.state.gameStage % 2 === 1)
 			roundTime = 15;
 		else
-			roundTime = 30;
+			roundTime = 45;
 
 		var currentTime = Math.floor(Date.now() / 1000);
 		return Math.max(0, roundTime - (currentTime - this.state.stageStart));
@@ -210,11 +213,11 @@ class Game extends Component {
 		if (this.state.gameStage === 0)
 			return "";
 		else if (this.state.gameStage % 2 === 0)
-			return "Round " + Math.ceil(this.state.gameStage / 2);
+			return "Round " + Math.ceil(this.state.gameStage / 2) + "/" + this.roundCount;
 		else if (this.isLastPostRound())
 			return "The final scores are in!";
 		else if (this.state.gameStage % 2 === 1)
-			return "Next: round " + Math.ceil(this.state.gameStage / 2);
+			return "Next: round " + Math.ceil(this.state.gameStage / 2) + "/" + this.roundCount;
 	}
 
 	coinTable() {
@@ -326,7 +329,7 @@ class Game extends Component {
 						: this.getChoiceTable() 
 				}
 				<Spacer height="1" />
-				<Text big>Coins</Text>
+				<Text big>Coins - jackpot <Highlight>{ this.state.userIds.length * 200 }</Highlight></Text>
 				<Spacer height="0.1" />
 				<InfoTable>
 					{ this.coinTable() }
@@ -334,7 +337,7 @@ class Game extends Component {
 			</div>
 			<div>
 				<ChatPanel codenames={ this.codenames } colours={ this.colours } userIds={ this.state.userIds } thisUserId={ this.state.userId }
-					ref={ this.chatPanel } messages={ this.state.messages } messageCallback={ this.chatPanelMessage } />
+					ref={ this.chatPanel } messages={ this.state.messages } messageCallback={ this.chatPanelMessage } question={ this.state.question } />
 			</div>
 		</div>
 		);

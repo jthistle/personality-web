@@ -26,9 +26,6 @@ class Header extends Component {
 					<Highlight>Personality</Highlight>
 				</div>
 				<HeaderItem>
-					<Button className="HeaderItem" linkTo="/" text="To Home" />
-				</HeaderItem>
-				<HeaderItem>
 					<Button className="HeaderItem" linkTo="dashboard" text="To Dashboard" />
 				</HeaderItem>
 				<HeaderItem align="Right">

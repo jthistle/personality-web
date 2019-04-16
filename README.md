@@ -9,7 +9,7 @@ This project is built with **yarn**.
 
 `yarn install` to get started.
 
-`yarn start` to run the development server.
+`yarn start` to run the development server. For more detailed setup, see the [setup README](setup/README.md).
 
 ### Running order
 

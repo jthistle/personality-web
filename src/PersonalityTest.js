@@ -11,13 +11,35 @@ import { Redirect } from 'react-router-dom';
 
 var descriptors = require("./descriptors.json");
 
+// See: https://stackoverflow.com/questions/11381673/detecting-a-mobile-browser/13819253#13819253
+var isMobile = {
+    iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    },
+    Android: function() {
+        return navigator.userAgent.match(/Android/i);
+    },
+    Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+    },
+    Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    },
+    BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    },
+    any: function() {
+        return (isMobile.iOS() || isMobile.Android()  || isMobile.Windows() || isMobile.Opera() || isMobile.BlackBerry());
+    }
+};
+
 class PersonalityTest extends Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
 			positions: [],
-			redirect: false,
+			redirect: isMobile.any(),
 		}
 
 		this.handleDragEnd = this.handleDragEnd.bind(this);
@@ -172,8 +194,8 @@ class PersonalityTest extends Component {
 		.then(console.log("done"))
 		.then(data => {
 		  	localStorage.setItem("userHash", data.data.createProfile);
-		  	this.setState({redirect: true});
-		  	window.location.reload(); 	// HACK
+		  	//this.setState({redirect: true});
+		  	//window.location.reload(); 	// HACK
 		});
 
 		return;

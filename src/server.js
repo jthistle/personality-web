@@ -1,22 +1,38 @@
-const secrets 		= require('./secrets.js');
-var express 		= require('express');
-var graphqlHTTP		= require('express-graphql');
+const secrets = require('./secrets.js');
+var express = require('express');
+var graphqlHTTP = require('express-graphql');
+var cors = require('cors');
 var { buildSchema } = require('graphql');
-var mysql			= require('mysql');
-const crypto 		= require('crypto');
-const fs 		    = require('fs');
+var mysql = require('mysql');
+const crypto = require('crypto');
+const fs = require('fs');
 
+// Init the MySQL connection
 var connection = mysql.createConnection({
-	host	 : 'localhost',
-	user	 : 'pers',
-	password :  secrets.dbPwd,
-	database : 'personality'
+	host: 'localhost',
+	user: 'pers',
+	password: secrets.dbPwd,
+	database: 'personality'
 });
 
 connection.connect();
 
+// Domains that we'll accept requests from
+const WHITELISTED = [
+	"192.168.0.9",
+	"localhost",
+];
 
-// Construct a schema, using GraphQL schema language
+// Check if a domain is whitelisted to accept requests from
+function isWhitelisted(origin) {
+	for (domain of WHITELISTED) {
+		if (domain.includes(origin))
+			return true;
+	}
+	return false;
+}
+
+// Construct the GraphQL schema
 var schema = buildSchema(`
 	type Query {
 		hello: String,
@@ -62,7 +78,8 @@ var schema = buildSchema(`
 		userId: Int!,
 		messages: [Message]!,
 		newOffset: Int!,
-		opinion: Opinion
+		opinion: Opinion,
+		question: String
 	},
 	type Message {
 		userId: Int!,
@@ -89,6 +106,12 @@ const maxMessageLen = 200;
 var cachedChats = {};
 var lastMessages = {};
 
+//
+// 	updateWaitingCount()
+//	This asynchronously either retrieves the cached value of the waiting count, or
+//	it queries the database for the current waiting count. Used by multiple resolvers.
+// 	TODO: write an actual cache manager. 
+//
 function updateWaitingCount() {
 	return new Promise((resolve, reject) => {
 		var currentTime = Date.now() / 1000;
@@ -96,7 +119,7 @@ function updateWaitingCount() {
 		if (cachedWaitingTime + cachedWaitingInterval > currentTime)
 			resolve(cachedWaiting);
 
-		var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > "+Math.floor(currentTime-2)+";";
+		var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > " + Math.floor(currentTime - 2) + ";";
 		connection.query(query, function (error, results, fields) {
 			if (error)
 				reject(error);
@@ -110,9 +133,15 @@ function updateWaitingCount() {
 	});
 }
 
+
+//
+// 	getInGame()
+//	This asynchronously checks if a user is in a game or not, based on the inGame flag in the database.
+// 	Used by multiple resolvers.
+//
 function getInGame(hash) {
 	return new Promise((resolve, reject) => {
-		connection.query("SELECT id FROM profiles WHERE hash='"+hash+"' AND inGame = 1 LIMIT 1;", function(error, results, fields) {
+		connection.query("SELECT id FROM profiles WHERE hash='" + hash + "' AND inGame = 1 LIMIT 1;", function (error, results, fields) {
 			if (error)
 				reject(error);
 			else
@@ -121,12 +150,17 @@ function getInGame(hash) {
 	});
 }
 
+//
+// 	initChat(gameHash: string)
+//	This initialises a chat object if not already created, by either reading an existing file
+//  from the directory at chatsPath, or creating a new object and a chat file to go with it.
+//
 function initChat(gameHash) {
 	// Init chat if not created
 	if (!(gameHash in cachedChats)) {
 		var chatPath = chatsPath + gameHash + ".txt";
 		var fd = fs.openSync(chatPath, "a+");
-		var thisChat = fs.readFileSync(chatPath, {encoding: "utf8"});
+		var thisChat = fs.readFileSync(chatPath, { encoding: "utf8" });
 		var tempChat;
 		if (thisChat != "") {
 			tempChat = JSON.parse(thisChat);
@@ -138,14 +172,23 @@ function initChat(gameHash) {
 	}
 }
 
+//
+// 	writeChat(gameHash: string)
+//	Writes a cached chat to the game file.
+//
 function writeChat(gameHash) {
 	if (gameHash in cachedChats) {
 		var chatPath = chatsPath + gameHash + ".txt";
 		fs.writeFileSync(chatPath, JSON.stringify(cachedChats[gameHash]));
-		console.log("wrote chat "+gameHash);
+		console.log("wrote chat " + gameHash);
 	}
 }
 
+//
+// 	getGameHash(hash: string)
+//	Takes a user hash, and async returns the gameHash of the user's current game and
+//	the user's userId. 
+//
 function getGameHash(hash) {
 	return new Promise((resolve, reject) => {
 		connection.query("SELECT id, gameHash FROM profiles WHERE hash = ?;", [hash], function (error, results, fields) {
@@ -172,9 +215,12 @@ var root = {
 		return 'Hello world!';
 	},
 
+	//
+	// 	profile(hash: String!)
+	//	returns information about a profile with a given hash
+	//
 	profile: ({ hash }) => {
 		return new Promise((resolve, reject) => {
-			console.log("Query: profile, "+ hash);
 			connection.query("SELECT * FROM profiles WHERE hash = ? LIMIT 1", [hash], function (error, results, fields) {
 				if (error) {
 					reject(error);
@@ -188,19 +234,23 @@ var root = {
 						id: results[0].id,
 						hash: results[0].hash,
 						profileData: JSON.parse(results[0].profileData),
-						//interactions: JSON.parse(results[0].interactions),
 					});
 				}
 			});
 		});
 	},
 
+	//
+	// 	createProfile(profileData: String!, method: String!)
+	//	Creates a profile, returns its new hash. TODO: apply a limiter to this on the react front-end.
+	//  Method should be one of ['a', 'b'], profileData should be a JSON-encoded array.
+	//
 	createProfile: ({ profileData, method }) => {
 		return new Promise((resolve, reject) => {
 			var newHash = crypto.randomBytes(20).toString('hex');
 			var strData = JSON.stringify(profileData);
 			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES (?, ?, ?, '{}');", [newHash, strData, method], function (error, results, fields) {
-				if (error) 
+				if (error)
 					reject(error);
 				else {
 					resolve(newHash);
@@ -209,13 +259,18 @@ var root = {
 		});
 	},
 
+	//
+	// 	setWaiting(hash: String!, isWaiting: Boolean!)
+	//	Sets the isWaiting flag of a user in the database, acknowledging that they want to join
+	// 	a game. The rest is handled by the game manager.
+	//
 	setWaiting: ({ hash, isWaiting }) => {
 		return new Promise((resolve, reject) => {
 			var value = isWaiting ? 1 : 0;
 			var currentTime = Math.floor(Date.now() / 1000);
 
 			connection.query("UPDATE profiles SET isWaiting = ?, lastWaitingUpdate = ? WHERE hash = ?;", [value, currentTime, hash], function (error, results, fields) {
-				if (error) 
+				if (error)
 					reject(error);
 				else {
 					updateWaitingCount().then((data) => {
@@ -231,6 +286,11 @@ var root = {
 		});
 	},
 
+	//
+	// 	getWaitingCount(hash: String!)
+	//	Simply returns the number of people waiting for a game, to provide a count for the
+	// 	lobby view.
+	//
 	getWaitingCount: ({ hash }) => {
 		return new Promise((resolve, reject) => {
 			updateWaitingCount().then((data) => {
@@ -244,7 +304,10 @@ var root = {
 		});
 	},
 
-	// This returns the user choices and coins as a json array
+	//
+	// 	getGameDetails(hash: String!, userChoice: Int!, offset: Int!)
+	//	Returns all the details of a game, based on a user id. TODO: caching.
+	//
 	getGameDetails: ({ hash, userChoice, offset }) => {
 		return new Promise((resolve, reject) => {
 			if (userChoice < 0 || userChoice > 2)
@@ -261,7 +324,7 @@ var root = {
 					tempMessages = cachedChats[gameHash].slice(offset, cachedChats.length);
 				}
 
-				connection.query("SELECT stage, stagestart, coins, userChoices, opinions FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
+				connection.query("SELECT stage, stagestart, coins, userChoices, opinions, question FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
 					if (error) {
 						console.error(error);
 						reject(error);
@@ -272,6 +335,7 @@ var root = {
 					var stage = results[0].stage;
 					var stageStart = results[0].stagestart;
 					var opinions = JSON.parse(results[0].opinions);
+					var question = results[0].question;
 					var tempOpinion = {};
 
 					if (userId.toString() in opinions)
@@ -290,7 +354,8 @@ var root = {
 						userId: userId,
 						messages: tempMessages,
 						newOffset: cachedChats[gameHash].length,
-						opinion: tempOpinion
+						opinion: tempOpinion,
+						question: question,
 					}
 
 					if (stage % 2 == 1 || stage == 0)
@@ -310,6 +375,10 @@ var root = {
 		});
 	},
 
+	//
+	//	sendMessage(hash: String!, message: String!)
+	// 	Sends a message to the chat of the game that the user is currently in.
+	//
 	sendMessage: ({ hash, message }) => {
 		return new Promise((resolve, reject) => {
 			var currentTime = Date.now() / 1000;
@@ -337,6 +406,11 @@ var root = {
 		});
 	},
 
+	//
+	//	sendOpinion(hash: String!, mostLiked: Boolean!, userId: Int!)
+	// 	Sends the final judgement of a user of who their most/least favourite person in the
+	//  game was.
+	//
 	sendOpinion: ({ hash, mostLiked, userId }) => {
 		return new Promise((resolve, reject) => {
 			getGameHash(hash).then((data) => {
@@ -384,18 +458,37 @@ var root = {
 	},
 };
 
+// Handle interrupts and gracefully end the server. TODO: handle all requests to stop,
+// not just SIGINT.
 process.on("SIGINT", () => {
-    console.log("\nExiting server for personality-web...");
+	console.log("\nExiting server for personality-web...");
 
-    // write all chats
-    for (hash in cachedChats) {
-    	writeChat(hash);
-    }
+	// write all chats
+	for (hash in cachedChats) {
+		writeChat(hash);
+	}
 
-    process.exit();
+	process.exit();
 });
 
+//
+//	Setup and run the server
+//
 var app = express();
+
+// Options for CORS
+var corsOptions = {
+	origin: function (origin, callback) {
+		if (isWhitelisted(origin)) {
+			callback(null, true);
+		} else {
+			callback("", true);
+		}
+	}
+}
+
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 app.use("/graphql", graphqlHTTP({
 	schema: schema,
 	rootValue: root,

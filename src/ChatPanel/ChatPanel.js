@@ -51,7 +51,7 @@ class ChatPanel extends Component {
 	render() {
 		return (
 			<div className="ChatPanel">
-				<div className="ChatItem ChatHeader">Chat</div>
+				<div className="ChatItem ChatHeader">Q: { this.props.question }</div>
 					<div className="ChatMessages" ref={ this.chatMessages }>
 					{
 						this.getMessages()
