@@ -6,6 +6,7 @@ import PersonalityTestB from './PersonalityTestB';
 import Dashboard from './Dashboard';
 import Lobby from './Lobby';
 import Game from './Game';
+import About from './About';
 import './App.css';
 import { Switch, Route, withRouter } from 'react-router-dom';
 
@@ -21,6 +22,7 @@ class App extends Component {
 	        <Route path='/dashboard' component={ Dashboard } />
 	        <Route path='/lobby' component={ Lobby } />
 	        <Route path='/game' component={ Game } />
+	        <Route path='/about' component={ About } />
 	      </Switch>
 	    </div>
 		)

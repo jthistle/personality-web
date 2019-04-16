@@ -10,8 +10,12 @@ class Header extends Component {
 		super(props);
 	}
 
+	isLoggedIn() {
+		return !!localStorage.getItem("userHash");
+	}
+
 	getLoggedIn() {
-		var userHash = localStorage.getItem('userHash');
+		var userHash = localStorage.getItem("userHash");
 		if (userHash) {
 			return userHash;
 		} else{
@@ -25,8 +29,16 @@ class Header extends Component {
 				<div className="Title">
 					<Highlight>Personality</Highlight>
 				</div>
-				<HeaderItem>
+				{
+				this.isLoggedIn() ? (<HeaderItem>
 					<Button className="HeaderItem" linkTo="dashboard" text="To Dashboard" />
+				</HeaderItem>) :
+				(<HeaderItem>
+					<Button className="HeaderItem" linkTo="/" text="Homepage" />
+				</HeaderItem>)
+				}
+				<HeaderItem>
+					<Button className="HeaderItem" linkTo="about" text="About Personality" />
 				</HeaderItem>
 				<HeaderItem align="Right">
 					<LoggedIn />

@@ -7,6 +7,7 @@ var mysql 			= require('mysql');
 const crypto 		= require('crypto');
 const fs 			= require('fs');
 var cacheManager 	= require("./cacheManager.js");
+var badWords 		= require('bad-words');
 
 // Init the MySQL connection
 var connection = mysql.createConnection({
@@ -17,6 +18,9 @@ var connection = mysql.createConnection({
 });
 
 connection.connect();
+
+// Set up bad words filter
+var filter = new badWords({ placeHolder: '❤'});
 
 // Domains that we'll accept requests from
 const WHITELISTED = [
@@ -118,7 +122,7 @@ function updateWaitingCount() {
 		var currentTime = Date.now() / 1000;
 
 		if (!cache.needsUpdate("waiting"))
-			resolve(cache.get("waiting"));
+			return resolve(cache.get("waiting"));
 
 		var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > " + Math.floor(currentTime - 2) + ";";
 		connection.query(query, function (error, results, fields) {
@@ -430,6 +434,8 @@ var root = {
 					return resolve(false);
 				}
 			}
+
+			message = filter.clean(message);
 
 			getGameHash(hash).then((data) => {
 				var gameHash = data.gameHash;
