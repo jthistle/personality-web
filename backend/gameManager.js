@@ -12,7 +12,7 @@ const questions 	= require("./questions.json");
 // connect directly to the database.
 var connection = mysql.createConnection({
 	host	 : 'localhost',
-	user	 : 'pers',
+	user	 :  secrets.uname,
 	password :  secrets.dbPwd,
 	database : 'personality'
 });

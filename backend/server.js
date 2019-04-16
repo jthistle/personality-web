@@ -12,7 +12,7 @@ var badWords 		= require('bad-words');
 // Init the MySQL connection
 var connection = mysql.createConnection({
 	host: 'localhost',
-	user: 'pers',
+	user: secrets.uname,
 	password: secrets.dbPwd,
 	database: 'personality'
 });
@@ -26,6 +26,7 @@ var filter = new badWords({ placeHolder: '❤'});
 const WHITELISTED = [
 	"192.168.0.9",
 	"localhost",
+	"spbriggs.co.uk"
 ];
 
 // Check if a domain is whitelisted to accept requests from
@@ -254,7 +255,7 @@ var root = {
 		return new Promise((resolve, reject) => {
 			var newHash = crypto.randomBytes(20).toString('hex');
 			var strData = JSON.stringify(profileData);
-			connection.query("INSERT INTO profiles (hash, profileData, method, interactions) VALUES (?, ?, ?, '{}');", [newHash, strData, method], function (error, results, fields) {
+			connection.query("INSERT INTO profiles (hash, profileData, method) VALUES (?, ?, ?);", [newHash, strData, method], function (error, results, fields) {
 				if (error)
 					reject(error);
 				else {
