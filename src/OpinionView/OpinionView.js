@@ -62,8 +62,8 @@ class OpinionView extends Component {
 	render() {
 		return (
 			<div className="OpinionView">
-				<div class="ViewRow"><div>I most liked...</div> { this.getUsers(true) }</div>
-				<div class="ViewRow"><div>I least liked...</div> { this.getUsers(false) }</div>
+				<div className="ViewRow"><div>I most liked...</div> { this.getUsers(true) }</div>
+				<div className="ViewRow"><div>I least liked...</div> { this.getUsers(false) }</div>
 			</div>
 		);
 	}

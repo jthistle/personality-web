@@ -190,12 +190,13 @@ class Game extends Component {
 					color: "#" + this.colours[codeId],
 					fontWeight: "bold"
 				}
+
 				return (
-					<div><span style={ style }>{ this.codenames[codeId] }</span> has won!</div>
+					<div>
+						<span style={ style }>{ this.codenames[codeId] }</span> has won!
+					</div>
 				);
 			}
-
-			return "Game has ended!";
 		} else if (this.state.gameStage % 2 === 1)
 			roundTime = 15;
 		else
@@ -203,6 +204,13 @@ class Game extends Component {
 
 		var currentTime = Math.floor(Date.now() / 1000);
 		return Math.max(0, roundTime - (currentTime - this.state.stageStart));
+	}
+
+	getBackButton() {
+		if (this.state.gameStage === 0)
+			return (<Button linkTo="/dashboard">Leave game</Button>);
+
+		return ""
 	}
 
 	isLastPostRound() {
@@ -328,6 +336,7 @@ class Game extends Component {
 							userId={ this.state.userId } opinionCallback={ this.opinionCallback } opinion={ this.state.opinion } />
 						: this.getChoiceTable() 
 				}
+				{ this.getBackButton() }
 				<Spacer height="1" />
 				<Text big>Coins - jackpot <Highlight>{ this.state.userIds.length * 200 }</Highlight></Text>
 				<Spacer height="0.1" />

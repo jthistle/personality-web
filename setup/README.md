@@ -6,16 +6,15 @@ First, the database must be setup. Run `games.sql` and `profiles.sql` to create 
 
 ## Config 
 
-In setupProxy.js, set the IP to the one server.js is running on - this should be the local IP address of the device that this everything is running on. Set the URL of config.js to also have this same IP, or do something. I don't have
-a clue how the proxy works to be honest.
+In config.js, set the IP to the one server.js is running on - this should be the domain name/address of the device that this everything is running on.
 
 ## Running
 
 ### Backend
 
-`node src/server.js`
+`node backend/server.js`
 
-`node src/gameManager.js`
+`node backend/gameManager.js`
 
 ### The important part
 

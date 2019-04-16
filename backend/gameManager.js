@@ -25,11 +25,11 @@ const MIN_USERS_PER_GAME = 3;
 // How long to wait once a number of users is met
 const WAITFOR = [0, 0, 40, 20, 0];
 
-const PREGAME_TIME = 15;
 const ROUND_TIME = 45;
 const POST_ROUND_TIME = 15;
+const PREGAME_TIME = POST_ROUND_TIME;	// legacy, hacky
 
-const ROUND_COUNT = 4; 		// TODO: change to 3 or >, 2 is for testing
+const ROUND_COUNT = 4;
 
 const HOLD_COIN_AMOUNT = 100;
 

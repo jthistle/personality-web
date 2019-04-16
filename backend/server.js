@@ -1,11 +1,12 @@
-const secrets = require('./secrets.js');
-var express = require('express');
-var graphqlHTTP = require('express-graphql');
-var cors = require('cors');
+const secrets  		= require('./secrets.js');
+var express 		= require('express');
+var graphqlHTTP 	= require('express-graphql');
+var cors 			= require('cors');
 var { buildSchema } = require('graphql');
-var mysql = require('mysql');
-const crypto = require('crypto');
-const fs = require('fs');
+var mysql 			= require('mysql');
+const crypto 		= require('crypto');
+const fs 			= require('fs');
+var cacheManager 	= require("./cacheManager.js");
 
 // Init the MySQL connection
 var connection = mysql.createConnection({
@@ -93,11 +94,12 @@ var schema = buildSchema(`
 	#},
 `);
 
-// Some values are cached, since the amount of people waiting is
-// the same for every user.
-var cachedWaitingTime = 0;
-var cachedWaiting = 0;
-const cachedWaitingInterval = 1; 	// interval in seconds between waiting count updates
+// Init cache manager
+var cache = new cacheManager();
+
+// The amount of people waiting is the same for every user, so cache it
+cache.newObject("waiting", 1000);
+cache.newAssoc("gameDetails", 1000);
 
 const chatsPath = "games/";
 const minMessageGap = 3; 	// seconds
@@ -110,14 +112,13 @@ var lastMessages = {};
 // 	updateWaitingCount()
 //	This asynchronously either retrieves the cached value of the waiting count, or
 //	it queries the database for the current waiting count. Used by multiple resolvers.
-// 	TODO: write an actual cache manager. 
 //
 function updateWaitingCount() {
 	return new Promise((resolve, reject) => {
 		var currentTime = Date.now() / 1000;
 
-		if (cachedWaitingTime + cachedWaitingInterval > currentTime)
-			resolve(cachedWaiting);
+		if (!cache.needsUpdate("waiting"))
+			resolve(cache.get("waiting"));
 
 		var query = "SELECT COUNT(*) FROM profiles WHERE isWaiting=1 AND lastWaitingUpdate > " + Math.floor(currentTime - 2) + ";";
 		connection.query(query, function (error, results, fields) {
@@ -125,9 +126,9 @@ function updateWaitingCount() {
 				reject(error);
 			else {
 				// Update cache values
-				cachedWaiting = results[0]["COUNT(*)"];
-				cachedWaitingTime = Date.now() / 1000;
-				resolve(cachedWaiting);
+				waitingCount = results[0]["COUNT(*)"];
+				cache.set("waiting", waitingCount);
+				resolve(waitingCount);
 			}
 		});
 	});
@@ -306,7 +307,7 @@ var root = {
 
 	//
 	// 	getGameDetails(hash: String!, userChoice: Int!, offset: Int!)
-	//	Returns all the details of a game, based on a user id. TODO: caching.
+	//	Returns all the details of a game, based on a user id.
 	//
 	getGameDetails: ({ hash, userChoice, offset }) => {
 		return new Promise((resolve, reject) => {
@@ -324,20 +325,47 @@ var root = {
 					tempMessages = cachedChats[gameHash].slice(offset, cachedChats.length);
 				}
 
-				connection.query("SELECT stage, stagestart, coins, userChoices, opinions, question FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
+				var mustUpdateGameDetails = cache.needsUpdate("gameDetails", gameHash);
+
+				var query;
+				if (mustUpdateGameDetails)
+					query = "SELECT stage, stagestart, coins, userChoices, opinions, question FROM games WHERE hash = ?;";
+				else 
+					query = "SELECT userChoices FROM games WHERE hash = ?;";
+
+				connection.query(query, [gameHash], function (error, results, fields) {
 					if (error) {
 						console.error(error);
 						reject(error);
 					}
 
+					// This will never be cached
 					var choices = JSON.parse(results[0].userChoices);
-					var coins = results[0].coins;
-					var stage = results[0].stage;
-					var stageStart = results[0].stagestart;
-					var opinions = JSON.parse(results[0].opinions);
-					var question = results[0].question;
-					var tempOpinion = {};
 
+					var cachedDetails;
+					var coins;
+					var stage;
+					var stageStart;
+					var opinions;
+					var question;
+
+					if (mustUpdateGameDetails) {
+						coins = results[0].coins;
+						stage = results[0].stage;
+						stageStart = results[0].stagestart;
+						opinions = JSON.parse(results[0].opinions);
+						question = results[0].question;
+					} else {
+						var allCached = cache.get("gameDetails", gameHash);
+						cachedDetails = allCached.obj;
+						opinions      = allCached.opinions;
+
+						stage = cachedDetails.stage;
+						//console.log(JSON.stringify(cachedDetails));
+					}
+
+					// Get the user's specific opinion
+					var tempOpinion = {};
 					if (userId.toString() in opinions)
 						tempOpinion = opinions[userId.toString()];
 
@@ -345,21 +373,35 @@ var root = {
 					if (stage !== 0 && stage % 2 !== 1)
 						choices[userId] = userChoice;
 
-					var newUserChoices = JSON.stringify(choices);
-
-					var returnObj = {
-						coins: coins,
-						gameStage: stage,
-						stageStart: stageStart,
-						userId: userId,
-						messages: tempMessages,
-						newOffset: cachedChats[gameHash].length,
-						opinion: tempOpinion,
-						question: question,
+					// Init and create the return object
+					var returnObj;
+					if (mustUpdateGameDetails) {
+						returnObj = {
+							coins: coins,
+							gameStage: stage,
+							stageStart: stageStart,
+							messages: tempMessages,
+							question: question,
+						}
+					} else {
+						returnObj = cachedDetails;
 					}
 
+					// Update the cache if needed, but only with general game things - not
+					// user specific things, these are set later
+					if (mustUpdateGameDetails) {
+						cache.set("gameDetails", { obj: returnObj, opinions: opinions }, gameHash);
+					}
+
+					// Set user specific things
+					// First, update the user choices array
+					var newUserChoices = JSON.stringify(choices);
 					if (stage % 2 == 1 || stage == 0)
 						returnObj.userChoices = newUserChoices;
+
+					returnObj.userId = userId;
+					returnObj.newOffset = cachedChats[gameHash].length;
+					returnObj.opinion = tempOpinion;
 
 					connection.query("UPDATE games SET userChoices = ? WHERE hash = ?;", [newUserChoices, gameHash], function (error, results, fields) {
 						if (error) {
