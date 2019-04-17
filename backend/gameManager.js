@@ -340,7 +340,7 @@ class GameManager {
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
 
-					logger.log(game.hash+": moved to post-round, stage is now "+ game.stage);
+//					logger.log(game.hash+": moved to post-round, stage is now "+ game.stage);
 				}
 			}
 			// We are in post-round
@@ -361,7 +361,7 @@ class GameManager {
 					}
 					this.updateGame(gameId);
 
-					logger.log(game.hash+": moved to next round, stage is now "+ game.stage);
+//					logger.log(game.hash+": moved to next round, stage is now "+ game.stage);
 				}
 			}
 		}
