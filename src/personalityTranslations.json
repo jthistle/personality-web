@@ -8,7 +8,11 @@
 					"text": "You're very imaginative, with a wide range of interests. Your thought processes are very unusual, and you can be very original."
 				},
 				{
-					"min": 0.5,
+					"min": 0.6,
+					"text": "You tend to be imaginative, and have unusual through processes. Originality is a skill of yours as well."
+				},
+				{
+					"min": 0.4,
 					"text": "You're quite curious and imaginative. You probably tend to value intellectual matters more than other things."
 				},
 				{
@@ -17,7 +21,7 @@
 				},
 				{
 					"min": 0,
-					"text": "Creativity and artistic matters aren't your thing, neither are highly intellectual things. You have no problem with widely accepted ideas and cultural concepts."
+					"text": "Creativity and artistic matters aren't your thing, neither are highly intellectual things. You have no problem with accepted ideas and cultural concepts."
 				}
 			]
 		},
@@ -29,7 +33,11 @@
 					"text": "Achievement is where all your motivation comes from. You're very capable in roles assigned to you, and dutiful to any leaders."
 				},
 				{
-					"min": 0.5,
+					"min": 0.6,
+					"text": "You're most motivated by achievement, and are good at following commands from others. You're more self-disciplined than most."
+				},
+				{
+					"min": 0.4,
 					"text": "You want to achieve things, and tend to obey most orders. You follow a routine and are fairly self-disciplined."
 				},
 				{
@@ -50,7 +58,11 @@
 					"text": "You're extremely outgoing and enthusiastic. Others probably find you very assertive, and enjoy being around you."
 				},
 				{
-					"min": 0.5,
+					"min": 0.6,
+					"text": "You come across as very outgoing, enthusiastic, and assertive. Even though you might think you're depressed rarely, you'll always find a silver lining."
+				},
+				{
+					"min": 0.4,
 					"text": "You're talkative and fairly energetic. You want to be doing something usually, and you're happy more often than not."
 				},
 				{
@@ -71,8 +83,12 @@
 					"text": "You come across as very kind and appreciative - or at least that's how you see yourself."
 				},
 				{
-					"min": 0.5,
-					"text": "You're a kind, forgiving and appreciative person, most of the time."
+					"min": 0.6,
+					"text": "You see yourself as a genuinely nice and appreciative person, and you'd hope your friends and family see you that way too."
+				},
+				{
+					"min": 0.4,
+					"text": "You're a kind, forgiving and appreciative person - most of the time."
 				},
 				{
 					"min": 0.2,
@@ -92,7 +108,11 @@
 					"text": "You're anxious and worry a lot about yourself. You may be depressive, and are probably very self-conscious."
 				},
 				{
-					"min": 0.5,
+					"min": 0.6,
+					"text": "You're quite self-conscious, and honestly a bit self-pitying. You may appear to some as slightly unstable."
+				},
+				{
+					"min": 0.4,
 					"text": "You're quite self-conscious, and honestly a bit self-pitying. You may appear to some as slightly unstable."
 				},
 				{

@@ -102,10 +102,10 @@ class Lobby extends Component {
 			waitingTime = "up to 40 seconds waiting time";
 		else if (this.state.waitingCount == 4)
 			waitingTime = "up to 20 seconds waiting time";
-		else
+		else if (this.state.waitingCount >= 5)
 			waitingTime = "ready for game, just a moment";
 
-		return <div>{ this.state.waitingCount } people waiting <br />({ waitingTime }</div>;
+		return <div>{ this.state.waitingCount } people waiting <br />({ waitingTime })</div>;
 	}
 
 	getButton() {

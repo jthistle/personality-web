@@ -8,6 +8,18 @@ const crypto 		= require('crypto');
 const fs 			= require('fs');
 var cacheManager 	= require("./cacheManager.js");
 var badWords 		= require('bad-words');
+var winston 		= require('winston');
+
+// First, init the logger
+const logger = winston.createLogger({
+	level: "info",
+	format: winston.format.json(),
+	defaultMeta: { service: "persGraphQLServer" },
+	transports: [
+		new winston.transports.File({ filename: __dirname + "error.log", level: "error" }),
+		new winston.transports.File({ filename: __dirname + "combined.log" })
+	]
+});
 
 // Init the MySQL connection
 var connection = mysql.createConnection({
@@ -105,6 +117,7 @@ var cache = new cacheManager();
 // The amount of people waiting is the same for every user, so cache it
 cache.newObject("waiting", 1000);
 cache.newAssoc("gameDetails", 1000);
+cache.newAssoc("profileDetails", 60000);
 
 const chatsPath = "games/";
 const minMessageGap = 3; 	// seconds
@@ -186,7 +199,7 @@ function writeChat(gameHash) {
 	if (gameHash in cachedChats) {
 		var chatPath = chatsPath + gameHash + ".txt";
 		fs.writeFileSync(chatPath, JSON.stringify(cachedChats[gameHash]));
-		console.log("wrote chat " + gameHash);
+		logger.log("wrote chat " + gameHash);
 	}
 }
 
@@ -227,20 +240,28 @@ var root = {
 	//
 	profile: ({ hash }) => {
 		return new Promise((resolve, reject) => {
+			if (!cache.needsUpdate("profileDetails", hash)) {
+				return resolve(cache.get("profileDetails", hash));
+			}
+
 			connection.query("SELECT * FROM profiles WHERE hash = ? LIMIT 1", [hash], function (error, results, fields) {
 				if (error) {
-					reject(error);
-					return;
+					logger.error(error);
+					return reject(error);
 				}
 
 				if (results.length == 0) {
 					reject("Profile not found");
 				} else {
-					resolve({
+					var profileDetails = {
 						id: results[0].id,
 						hash: results[0].hash,
 						profileData: JSON.parse(results[0].profileData),
-					});
+					};
+
+					cache.set("profileDetails", profileDetails, hash);
+
+					resolve(profileDetails);
 				}
 			});
 		});
@@ -340,7 +361,7 @@ var root = {
 
 				connection.query(query, [gameHash], function (error, results, fields) {
 					if (error) {
-						console.error(error);
+						logger.error(error);
 						reject(error);
 					}
 
@@ -366,7 +387,7 @@ var root = {
 						opinions      = allCached.opinions;
 
 						stage = cachedDetails.stage;
-						//console.log(JSON.stringify(cachedDetails));
+						//logger.log(JSON.stringify(cachedDetails));
 					}
 
 					// Get the user's specific opinion
@@ -410,14 +431,14 @@ var root = {
 
 					connection.query("UPDATE games SET userChoices = ? WHERE hash = ?;", [newUserChoices, gameHash], function (error, results, fields) {
 						if (error) {
-							console.error(error);
+							logger.error(error);
 							reject(error);
 						} else
 							resolve(returnObj);
 					});
 				});
 			}).catch(data => {
-				console.error("Error with getting game details.");
+				logger.error("Error with getting game details.");
 			});
 		});
 	},
@@ -450,7 +471,7 @@ var root = {
 				//writeChat(gameHash);
 				resolve(true);
 			}).catch(data => {
-				console.error("Error with getting game details.");
+				logger.error("Error with getting game details.");
 			});
 		});
 	},
@@ -469,7 +490,7 @@ var root = {
 				connection.query("SELECT opinions, userids FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
 					var ids = JSON.parse(results[0].userids);
 					if (!ids.includes(userId)) {
-						console.warn(userId + " not in " + ids);
+						logger.warn(userId + " not in " + ids);
 						return reject(false);
 					}
 
@@ -501,16 +522,18 @@ var root = {
 					});
 				});
 			}).catch(data => {
-				console.error("Error with getting game details.");
+				logger.error("Error with getting game details.");
 			});
 		});
 	},
 };
 
-// Handle interrupts and gracefully end the server. TODO: handle all requests to stop,
-// not just SIGINT.
-process.on("SIGINT", () => {
-	console.log("\nExiting server for personality-web...");
+// Handle interrupts and kills and gracefully end the server.
+process.on("SIGTERM", endExecution);
+process.on("SIGINT", endExecution);
+
+function endExecution() {
+	logger.info("\nExiting server for personality-web...");
 
 	// write all chats
 	for (hash in cachedChats) {
@@ -518,7 +541,7 @@ process.on("SIGINT", () => {
 	}
 
 	process.exit();
-});
+}
 
 //
 //	Setup and run the server
@@ -544,4 +567,4 @@ app.use("/graphql", graphqlHTTP({
 	graphiql: true,
 }));
 app.listen(4000);
-console.log('Running a GraphQL API server at localhost:4000/graphql');
+logger.info('Running a GraphQL API server at localhost:4000/graphql');

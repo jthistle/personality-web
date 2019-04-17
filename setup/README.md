@@ -8,6 +8,8 @@ First, the database must be setup. Run `games.sql` and `profiles.sql` to create 
 
 In config.js, set the IP to the one server.js is running on - this should be the domain name/address of the device that this everything is running on.
 
+Set the absolute path of the personality installation and move the serverdaemon to /etc/init.d.
+
 ## Running
 
 ### Backend

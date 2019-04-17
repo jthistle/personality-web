@@ -33,6 +33,15 @@ class About extends Component {
                     and least liked person at the end of each game. <b>No</b> personally identifiable information, like IP
                     address, location, browser etc. is collected.
                 </Text>
+                <Spacer height="2" />
+                <Text big><Highlight>Code</Highlight></Text>
+                <Spacer height="1" />
+                <Text>
+                    Personality is open-source. The code repository is <a href="https://github.com/jthistle/personality-web" target="_blank">located on GitHub</a>.<br />
+                    Due to the nature of this project, unfortunately I can't accept contributions, but the entire
+                    codebase is GPL v2 licensed, so cloning it, modifying it, and all the other usual open source
+                    stuff is permitted.
+                </Text>
 			</div>
 		);
 	}
