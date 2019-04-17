@@ -215,7 +215,7 @@ function getGameHash(hash) {
 				return reject(error);
 
 			if (results.length === 0)
-				return reject(false);
+				return reject("Game "+ hash +" does not exist");
 
 			resolve(
 				{
@@ -437,8 +437,8 @@ var root = {
 							resolve(returnObj);
 					});
 				});
-			}).catch(data => {
-				logger.error("Error with getting game details.");
+			}).catch(error => {
+				logger.error("Error with getting game details: " + error);
 			});
 		});
 	},

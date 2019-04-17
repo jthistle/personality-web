@@ -7,6 +7,18 @@ const secrets 		= require('./secrets.js');
 var mysql			= require('mysql');
 const crypto 		= require('crypto');
 const questions 	= require("./questions.json");
+var winston 		= require('winston');
+
+// First, init the logger
+const logger = winston.createLogger({
+	level: "info",
+	format: winston.format.json(),
+	defaultMeta: { service: "persGameManager" },
+	transports: [
+		new winston.transports.File({ filename: __dirname + "error.log", level: "error" }),
+		new winston.transports.File({ filename: __dirname + "combined.log" })
+	]
+});
 
 // We're not going to bother with GraphQL for this, rather, just
 // connect directly to the database.
@@ -48,7 +60,7 @@ class GameManager {
 		return new Promise((resolve, reject) => {
 			this.con.query(query, function (error, results, fields) {
 				if (error) {
-					console.error(error);
+					logger.error(error);
 					reject(error);
 				} else {
 					resolve(results);
@@ -112,7 +124,7 @@ class GameManager {
 
 					var since = this.waitingForGameTime[id];
 					if (currentTime > since + waitTime) {
-						console.log("User "+id+" has waited long enough, should match now");
+						logger.log("User "+id+" has waited long enough, should match now");
 						doMatch = true;
 						break;
 					}
@@ -131,7 +143,7 @@ class GameManager {
 
 				if (currentGame.length == MAX_USERS_PER_GAME || this.waiters.length == 0) {
 					this.gamesToCreate.push(currentGame);
-					console.log("Matched users: "+ currentGame);
+					logger.log("Matched users: "+ currentGame);
 					currentGame = [];
 				}
 			}
@@ -180,7 +192,7 @@ class GameManager {
 
 				var setGame = "UPDATE profiles SET inGame=1, gameHash='"+newHash+"' WHERE id IN ("+game.join()+");";			
 				this.makeQuery(setGame);
-				console.log(newHash+": created game");
+				logger.log(newHash+": created game");
 			});
 		}
 
@@ -217,7 +229,7 @@ class GameManager {
 			if (usersToReset.length > 0) {
 				var query = "UPDATE profiles SET inGame=0 WHERE id IN ("+usersToReset.join()+");";
 				this.makeQuery(query).catch((error) => {
-					console.error(error);
+					logger.error(error);
 				});
 			}
 		});
@@ -277,13 +289,13 @@ class GameManager {
 
 			// We are in pregame
 			if (game.stage === 0)
-				console.warn("We really shouldn't be at this point...");
+				logger.warn("We really shouldn't be at this point...");
 			else if (game.stage === 1) {
 				if (currentTime > game.stagestart + PREGAME_TIME) {
 					game.stage++;
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
-					console.log(game.hash+": pregame over, starting");
+					logger.log(game.hash+": pregame over, starting");
 				}
 			}
 			// We are in play
@@ -306,7 +318,7 @@ class GameManager {
 						else if (choice === 2)
 							grabbers.push(userId);
 						else
-							console.warning("invalid choice: " + choice);
+							logger.warn("invalid choice: " + choice);
 					}
 
 					// Give coins to grabbers and splitters
@@ -328,7 +340,7 @@ class GameManager {
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
 
-					console.log(game.hash+": moved to post-round, stage is now "+ game.stage);
+					logger.log(game.hash+": moved to post-round, stage is now "+ game.stage);
 				}
 			}
 			// We are in post-round
@@ -349,7 +361,7 @@ class GameManager {
 					}
 					this.updateGame(gameId);
 
-					console.log(game.hash+": moved to next round, stage is now "+ game.stage);
+					logger.log(game.hash+": moved to next round, stage is now "+ game.stage);
 				}
 			}
 		}
@@ -387,7 +399,7 @@ class GameManager {
 
 	cleanup() {
 		// Put any cleanup here
-		console.log("Manager: ended execution");
+		logger.info("Manager: ended execution");
 		process.exit(0);
 	}
 
@@ -398,12 +410,12 @@ class GameManager {
 
 
 
-console.log("Running game manager...");
+logger.info("Running game manager...");
 
 var manager = new GameManager(connection);
 
 process.on("SIGINT", () => {
-    console.log("\nExiting game manager for personality-web...");
+    logger.info("\nExiting game manager for personality-web...");
     manager.cleanup();
     process.exit();
 });
