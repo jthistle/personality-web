@@ -26,3 +26,4 @@ package-lock.json.bak
 # app specific
 secrets.js
 /games
+backend/*.log

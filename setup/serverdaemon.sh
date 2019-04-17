@@ -11,8 +11,46 @@
 
 # This script should be copied to /etc/init.d
 
-srcLocation = /         # Change this to the absolute location of the personality installation
+SRCLOCATION=/home/jthistle/personality-web         # Change this to the absolute location of the personality installation
+PID_FILE=/tmp/perserver.pids
 
-node "$srcLocation"/backend/server.js &
-node "$srcLocation"/backend/gameManager.js &
-serve -s "$srcLocation"/build
+start() {
+	echo "Starting..."
+	if [ -f $PID_FILE ]; then
+		echo "Service already started!"
+	else
+		node "$SRCLOCATION"/backend/server.js &
+		echo $!	>> $PID_FILE
+		node "$SRCLOCATION"/backend/gameManager.js &
+		echo $! >> $PID_FILE
+		serve -s "$SRCLOCATION"/build &
+		echo $! >> $PID_FILE
+	fi
+}
+
+stop() {
+	echo "Stopping..."
+	kill $(cat $PID_FILE)
+	rm $PID_FILE
+	echo "Stopped."
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        ;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart}"
+	;;
+esac
+
+exit 0

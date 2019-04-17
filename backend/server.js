@@ -16,8 +16,8 @@ const logger = winston.createLogger({
 	format: winston.format.json(),
 	defaultMeta: { service: "persGraphQLServer" },
 	transports: [
-		new winston.transports.File({ filename: __dirname + "error.log", level: "error" }),
-		new winston.transports.File({ filename: __dirname + "combined.log" })
+		new winston.transports.File({ filename: __dirname + "/error.log", level: "error" }),
+		new winston.transports.File({ filename: __dirname + "/combined.log" })
 	]
 });
 
