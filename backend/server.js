@@ -119,7 +119,7 @@ cache.newObject("waiting", 1000);
 cache.newAssoc("gameDetails", 1000);
 cache.newAssoc("profileDetails", 60000);
 
-const chatsPath = "games/";
+const chatsPath = __dirname + "../games/";
 const minMessageGap = 3; 	// seconds
 const maxMessageLen = 200;
 
