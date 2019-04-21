@@ -405,7 +405,6 @@ var root = {
 							coins: coins,
 							gameStage: stage,
 							stageStart: stageStart,
-							messages: tempMessages,
 							question: question,
 						}
 					} else {
@@ -427,6 +426,7 @@ var root = {
 					returnObj.userId = userId;
 					returnObj.newOffset = cachedChats[gameHash].length;
 					returnObj.opinion = tempOpinion;
+					returnObj.messages = tempMessages;
 
 					connection.query("UPDATE games SET userChoices = ? WHERE hash = ?;", [newUserChoices, gameHash], function (error, results, fields) {
 						if (error) {
