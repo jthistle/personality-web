@@ -124,7 +124,7 @@ class GameManager {
 
 					var since = this.waitingForGameTime[id];
 					if (currentTime > since + waitTime) {
-						logger.log("User "+id+" has waited long enough, should match now");
+						logger.info("User "+id+" has waited long enough, should match now");
 						doMatch = true;
 						break;
 					}
@@ -143,7 +143,7 @@ class GameManager {
 
 				if (currentGame.length == MAX_USERS_PER_GAME || this.waiters.length == 0) {
 					this.gamesToCreate.push(currentGame);
-					logger.log("Matched users: "+ currentGame);
+					logger.info("Matched users: "+ currentGame);
 					currentGame = [];
 				}
 			}
@@ -192,7 +192,7 @@ class GameManager {
 
 				var setGame = "UPDATE profiles SET inGame=1, gameHash='"+newHash+"' WHERE id IN ("+game.join()+");";			
 				this.makeQuery(setGame);
-				logger.log(newHash+": created game");
+				logger.info(newHash+": created game");
 			});
 		}
 
@@ -295,7 +295,7 @@ class GameManager {
 					game.stage++;
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
-					logger.log(game.hash+": pregame over, starting");
+					logger.info(game.hash+": pregame over, starting");
 				}
 			}
 			// We are in play
@@ -340,7 +340,7 @@ class GameManager {
 					game.stagestart = currentTime;
 					this.updateGame(gameId);
 
-//					logger.log(game.hash+": moved to post-round, stage is now "+ game.stage);
+					logger.info(game.hash + ": moved to post-round, stage is now " + game.stage);
 				}
 			}
 			// We are in post-round
@@ -361,7 +361,7 @@ class GameManager {
 					}
 					this.updateGame(gameId);
 
-//					logger.log(game.hash+": moved to next round, stage is now "+ game.stage);
+					logger.info(game.hash+": moved to next round, stage is now "+ game.stage);
 				}
 			}
 		}
@@ -408,16 +408,16 @@ class GameManager {
 	}
 }
 
-
-
-logger.info("Running game manager...");
-
 var manager = new GameManager(connection);
 
-process.on("SIGINT", () => {
-    logger.info("\nExiting game manager for personality-web...");
+process.on("SIGINT", endManager);
+process.on("SIGTERM", endManager);
+
+function endManager() {
+	logger.info("\nExiting game manager for personality-web...");
     manager.cleanup();
     process.exit();
-});
+}
 
+logger.info("Running game manager...");
 manager.run();

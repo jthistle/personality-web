@@ -199,7 +199,7 @@ function writeChat(gameHash) {
 	if (gameHash in cachedChats) {
 		var chatPath = chatsPath + gameHash + ".txt";
 		fs.writeFileSync(chatPath, JSON.stringify(cachedChats[gameHash]));
-		logger.log("wrote chat " + gameHash);
+		logger.info("wrote chat " + gameHash);
 	}
 }
 
@@ -387,7 +387,6 @@ var root = {
 						opinions      = allCached.opinions;
 
 						stage = cachedDetails.stage;
-						//logger.log(JSON.stringify(cachedDetails));
 					}
 
 					// Get the user's specific opinion
