@@ -44,16 +44,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7071068"
-     inkscape:cx="237.44754"
-     inkscape:cy="492.35104"
+     inkscape:zoom="2.0000001"
+     inkscape:cx="248.77255"
+     inkscape:cy="691.91195"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g856"
      showgrid="false"
      inkscape:window-width="1362"
-     inkscape:window-height="675"
+     inkscape:window-height="729"
      inkscape:window-x="0"
-     inkscape:window-y="72"
+     inkscape:window-y="18"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata5">
@@ -238,5 +238,41 @@
        d="m 117.03292,132.54957 -4.20854,3.22933 -5.25938,-0.69241 -3.22932,-4.20854 0.6924,-5.25937 4.20855,-3.22933 5.25937,0.69241 3.22933,4.20854 z"
        inkscape:transform-center-x="1.7105376e-06"
        transform="rotate(-7.5362307,418.87251,127.97474)" />
+    <g
+       id="g856">
+      <g
+         id="g867">
+        <rect
+           style="fill:#282c34;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect847"
+           width="17.4625"
+           height="17.4625"
+           x="72.763405"
+           y="96.131729"
+           ry="3.4395804" />
+        <text
+           id="text860"
+           y="110.95308"
+           x="75.718567"
+           style="font-style:normal;font-weight:normal;font-size:15.68601131px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#080a0b;fill-opacity:1;stroke:none;stroke-width:0.39215028"
+           xml:space="preserve"><tspan
+             style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Rubik;-inkscape-font-specification:'Rubik Italic';fill:#080a0b;fill-opacity:1;stroke-width:0.39215028"
+             y="110.95308"
+             x="75.718567"
+             id="tspan858"
+             sodipodi:role="line">P</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:15.68601131px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#03b2fc;fill-opacity:1;stroke:none;stroke-width:0.39215028"
+           x="75.218575"
+           y="110.35308"
+           id="text851"><tspan
+             sodipodi:role="line"
+             id="tspan849"
+             x="75.218575"
+             y="110.35308"
+             style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Rubik;-inkscape-font-specification:'Rubik Italic';fill:#03b2fc;fill-opacity:1;stroke-width:0.39215028">P</tspan></text>
+      </g>
+    </g>
   </g>
 </svg>
