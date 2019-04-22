@@ -20,17 +20,6 @@ const logger = winston.createLogger({
 	]
 });
 
-// We're not going to bother with GraphQL for this, rather, just
-// connect directly to the database.
-var connection = mysql.createConnection({
-	host	 : 'localhost',
-	user	 :  secrets.uname,
-	password :  secrets.dbPwd,
-	database : 'personality'
-});
-
-connection.connect();
-
 const MAX_USERS_PER_GAME = 5;
 const MIN_USERS_PER_GAME = 3;
 
@@ -53,6 +42,10 @@ class GameManager {
 		this.gamesToCreate = [];		// an array of arrays of users ids of users who are matched	
 		this.gamesList = {}; 	// games with id keys
 		this.waitingForGameTime = {};
+	}
+
+	setCon(con) {
+		this.con = con;
 	}
 
 	// Helper function to make a query
@@ -408,7 +401,38 @@ class GameManager {
 	}
 }
 
+var connection;
 var manager = new GameManager(connection);
+
+// We're not going to bother with GraphQL for this, rather, just
+// connect directly to the database.
+function restartSqlConnection() {
+	connection = mysql.createConnection({
+		host: 'localhost',
+		user: secrets.uname,
+		password: secrets.dbPwd,
+		database: 'personality'
+	});
+
+	connection.connect(handleSqlError);
+	connection.on("error", handleSqlError);
+
+	manager.setCon(connection);
+}
+
+function handleSqlError(error) {
+	if (!error)
+		return;
+
+	logger.error("SQL Error: " + error.code + ": " + error);
+	if (error.code === "PROTOCOL_CONNECTION_LOST") {
+		restartSqlConnection();
+	} else {
+		throw error;
+	}
+}
+
+restartSqlConnection();
 
 process.on("SIGINT", endManager);
 process.on("SIGTERM", endManager);

@@ -22,14 +22,33 @@ const logger = winston.createLogger({
 });
 
 // Init the MySQL connection
-var connection = mysql.createConnection({
-	host: 'localhost',
-	user: secrets.uname,
-	password: secrets.dbPwd,
-	database: 'personality'
-});
+var connection;
+function restartSqlConnection() {
+	connection = mysql.createConnection({
+		host: 'localhost',
+		user: secrets.uname,
+		password: secrets.dbPwd,
+		database: 'personality'
+	});
 
-connection.connect();
+	connection.connect(handleSqlError);
+
+	connection.on("error", handleSqlError);
+}
+
+function handleSqlError(error) {
+	if (!error)
+		return;
+
+	logger.error("SQL Error: " + error.code + ": " + error);
+	if (error.code === "PROTOCOL_CONNECTION_LOST") {
+		restartSqlConnection();
+	} else {
+		throw error;
+	}
+}
+
+restartSqlConnection();
 
 // Set up bad words filter
 var filter = new badWords({ placeHolder: '❤'});
