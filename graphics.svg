@@ -45,7 +45,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.0000001"
-     inkscape:cx="248.77255"
+     inkscape:cx="248.52255"
      inkscape:cy="691.91195"
      inkscape:document-units="mm"
      inkscape:current-layer="g856"
@@ -241,7 +241,10 @@
     <g
        id="g856">
       <g
-         id="g867">
+         id="g867"
+         inkscape:export-filename="/home/james/personality-web/public/favicon.png"
+         inkscape:export-xdpi="96"
+         inkscape:export-ydpi="96">
         <rect
            style="fill:#282c34;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            id="rect847"

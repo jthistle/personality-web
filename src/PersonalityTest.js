@@ -194,8 +194,8 @@ class PersonalityTest extends Component {
 		.then(console.log("done"))
 		.then(data => {
 		  	localStorage.setItem("userHash", data.data.createProfile);
-		  	//this.setState({redirect: true});
-		  	//window.location.reload(); 	// HACK
+		  	this.setState({ redirect: true });
+		  	window.location.reload(); 	// HACK
 		});
 
 		return;
