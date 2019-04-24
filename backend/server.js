@@ -375,13 +375,15 @@ var root = {
 				var query;
 				if (mustUpdateGameDetails)
 					query = "SELECT stage, stagestart, coins, userChoices, opinions, question FROM games WHERE hash = ?;";
-				else 
+				else
 					query = "SELECT userChoices FROM games WHERE hash = ?;";
 
 				connection.query(query, [gameHash], function (error, results, fields) {
 					if (error) {
 						logger.error(error);
-						reject(error);
+						return reject(error);
+					} else if (results.length === 0) {
+						return reject("User game hash does not exist");
 					}
 
 					// This will never be cached
@@ -506,6 +508,9 @@ var root = {
 				var chooserId = data.userId;
 
 				connection.query("SELECT opinions, userids FROM games WHERE hash = ?;", [gameHash], function (error, results, fields) {
+					if (results.length === 0)
+						return reject("Game no longer exists");
+
 					var ids = JSON.parse(results[0].userids);
 					if (!ids.includes(userId)) {
 						logger.warn(userId + " not in " + ids);
