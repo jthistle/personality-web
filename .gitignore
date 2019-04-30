@@ -27,3 +27,6 @@ package-lock.json.bak
 secrets.js
 /games/*.txt
 backend/*.log
+
+analysis/*.json
+analysis/*.csv
